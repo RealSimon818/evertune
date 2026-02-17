@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Deposit</title>
+  <link rel="icon" href="images/logo.jpg" type="image/x-icon">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .back-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .back-link a {
+      color: #F7594E;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+    }
+    .dashboard-container {
+      max-width: 500px;
+      margin: 5% auto;
+      background-color: #ffffff;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .dashboard-title {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #F7594E;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .form-label {
+      font-weight: 500;
+      color: #495057;
+    }
+    .btn-custom {
+      width: 100%;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <div class="dashboard-title">Edit Deposit,Frozen and Pending</div>
+
+    <!-- Display Messages -->
+    <% if (message) { %>
+      <div class="alert alert-success" role="alert">
+        <%= message %>
+      </div>
+    <% } %>
+
+    <% if (error) { %>
+      <div class="alert alert-danger" role="alert">
+        <%= error %>
+      </div>
+    <% } %>
+
+    <form action="/editdeposit" method="POST" autocomplete="off">
+      <!-- Username -->
+      <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input 
+          type="text" 
+          class="form-control" 
+          id="username" 
+          name="username" 
+          placeholder="Enter Username" 
+          required
+        >
+      </div>
+
+      <!-- Deposit Amount -->
+      <div class="mb-3">
+        <label for="amount" class="form-label">Deposit Amount</label>
+        <input 
+          type="number" 
+          class="form-control" 
+          id="amount" 
+          name="amount" 
+          placeholder="Enter Deposit Amount" 
+          required
+        >
+      </div>
+
+      <!-- USDC Amount -->
+      <div class="mb-3">
+        <label for="usdcAmount" class="form-label">Pending Amount</label>
+        <input 
+          type="number" 
+          class="form-control" 
+          id="usdcAmount" 
+          name="usdcAmount" 
+          placeholder="Enter USDC Amount" 
+          step="0.01" 
+          required
+        >
+      </div>
+
+      <!-- Profit Amount -->
+      <div class="mb-3">
+        <label for="profitAmount" class="form-label">Pending Profit</label>
+        <input 
+          type="number" 
+          class="form-control" 
+          id="profitAmount" 
+          name="profitAmount" 
+          placeholder="Enter Profit Amount" 
+          step="0.01" 
+          required
+        >
+      </div>
+
+      <!-- Frozen USDC -->
+      <div class="mb-3">
+        <label for="frozenUSDC" class="form-label">Frozen USDC</label>
+        <input 
+          type="number" 
+          class="form-control" 
+          id="frozenUSDC" 
+          name="frozenUSDC" 
+          step="0.01" 
+          placeholder="Enter frozen USDC" 
+          required
+        >
+      </div>
+
+      <!-- Frozen Profits -->
+      <div class="mb-3">
+        <label for="frozenProfits" class="form-label">Frozen Profits</label>
+        <input 
+          type="number" 
+          class="form-control" 
+          id="frozenProfits" 
+          name="frozenProfits" 
+          step="0.01" 
+          placeholder="Enter frozen profits" 
+          required
+        >
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="btn btn-info btn-custom text-light">Save Deposit</button>
+    </form>
+
+    <!-- Backlink -->
+    <div class="back-link">
+      <a href="/admin/dashboard">Back to Dashboard</a>
+    </div>
+  </div>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

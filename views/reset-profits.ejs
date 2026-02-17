@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reset Today's Profits</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+    }
+    .message {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 5px;
+      color: #fff;
+      font-size: 1.2em;
+    }
+    .success {
+      background-color: #28a745;
+    }
+    .error {
+      background-color: #dc3545;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1em;
+      color: #fff;
+      background-color: #29c6c0;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #29c6c0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Reset Today's Profits</h1>
+  
+  <% if (success !== null) { %>
+    <div class="message <%= success ? 'success' : 'error' %>">
+      <%= message %>
+    </div>
+  <% } %>
+
+  <form action="/reset-profits" method="POST">
+    <button type="submit">Reset Today's Profits</button>
+  </form>
+</body>
+</html>

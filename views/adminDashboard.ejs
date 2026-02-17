@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard · User overview</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font for clean typography (optional) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+  <style>
+    * {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #f0f2f5;
+      display: flex;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+    .dashboard-wrapper {
+      display: flex;
+      width: 100%;
+      height: 100%;
+    }
+    /* --- SIDEBAR (unchanged structure, refined colors) --- */
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #1e2329 0%, #1a1e24 100%);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      padding-top: 24px;
+      position: fixed;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+      z-index: 4000;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.1);
+    }
+    .sidebar h2 {
+      font-size: 1.6rem;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+      color: white;
+      margin-bottom: 28px;
+      padding: 0 16px;
+      border-left: 4px solid #f7594e;
+    }
+    .sidebar a {
+      color: #acb5bd;
+      text-decoration: none;
+      padding: 14px 20px 14px 24px;
+      display: block;
+      font-weight: 500;
+      font-size: 0.95rem;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+    }
+    .sidebar a:hover {
+      background-color: #2c333d;
+      color: #fff;
+      border-left-color: #f7594e;
+    }
+    .sidebar a.active {
+      background-color: #2c333d;
+      color: white;
+      border-left-color: #f7594e;
+      font-weight: 600;
+    }
+    .logout-button {
+      display: block;
+      margin: 24px 20px;
+      padding: 12px 20px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: white;
+      background: #2c333d;
+      border: 1px solid #434d5a;
+      border-radius: 30px;
+      text-align: center;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .logout-button:hover {
+      background: #f7594e;
+      border-color: #f7594e;
+      color: white;
+    }
+
+    /* --- MAIN CONTENT (with margin-left for sidebar) --- */
+    .content {
+      margin-left: 260px;
+      width: calc(100% - 260px);
+      padding: 30px 36px;
+      overflow-y: auto;
+      background-color: #f8fafd;
+    }
+
+    /* header minimal */
+    .page-header {
+      margin-bottom: 30px;
+    }
+    .page-header h1 {
+      font-weight: 700;
+      font-size: 2.2rem;
+      color: #1e2329;
+      letter-spacing: -0.02em;
+    }
+    .page-header .badge-version {
+      background: #e9ecf3;
+      color: #2f3b4c;
+      border-radius: 40px;
+      padding: 6px 16px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      display: inline-block;
+    }
+
+    /* --- STAT CARDS (for user metrics) --- */
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin-bottom: 36px;
+    }
+    .stat-card {
+      flex: 1 1 200px;
+      background: white;
+      border-radius: 28px;
+      padding: 24px 22px;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.02), 0 2px 4px rgba(0,0,0,0.02);
+      border: 1px solid rgba(0,0,0,0.02);
+      transition: all 0.2s;
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 30px -12px rgba(247,89,78,0.15);
+      border-color: rgba(247,89,78,0.2);
+    }
+    .stat-label {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+      color: #6a7380;
+      margin-bottom: 12px;
+    }
+    .stat-number {
+      font-size: 3.2rem;
+      font-weight: 700;
+      color: #1e2329;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+    .stat-detail {
+      color: #4f5a69;
+      font-size: 0.95rem;
+      border-top: 1px solid #edf2f7;
+      padding-top: 12px;
+      margin-top: 8px;
+    }
+    .stat-detail span {
+      font-weight: 700;
+      color: #1e2329;
+    }
+    /* subtle color accents */
+    .stat-card.total .stat-label { color: #2c3e50; }
+    .stat-card.pending .stat-label { color: #b85c1a; }
+    .stat-card.active .stat-label { color: #0b6e4f; }
+    .stat-card.banned .stat-label { color: #b3342c; }
+
+    /* quick status badge row */
+    .quick-status {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 32px;
+      align-items: center;
+    }
+    .badge-status {
+      background: white;
+      padding: 6px 18px;
+      border-radius: 40px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #1e2329;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      border: 1px solid #eef2f6;
+    }
+    .badge-status i {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 10px;
+      margin-right: 8px;
+    }
+    .i-pending { background-color: #f4a261; }
+    .i-active { background-color: #2a9d8f; }
+    .i-banned { background-color: #e76f51; }
+
+    /* cards grid (existing management cards) */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 26px;
+      margin-top: 20px;
+    }
+    .card {
+      border: none;
+      border-radius: 24px;
+      background: #ffffff;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.02);
+      padding: 28px 22px;
+      transition: 0.15s;
+      border: 1px solid rgba(0,0,0,0.02);
+    }
+    .card:hover {
+      box-shadow: 0 18px 30px -10px rgba(0,0,0,0.06);
+      border-color: #f0f3f8;
+    }
+    .card-title {
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: #1e2329;
+      margin-bottom: 12px;
+      letter-spacing: -0.3px;
+    }
+    .card-text {
+      color: #4a5562;
+      font-size: 0.95rem;
+      margin-bottom: 22px;
+      line-height: 1.4;
+    }
+    .btn-info {
+      background: white;
+      border: 1.5px solid #dee4ed;
+      border-radius: 50px;
+      padding: 10px 24px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #1e2329;
+      transition: all 0.15s;
+    }
+    .btn-info:hover {
+      background: #f7594e;
+      border-color: #f7594e;
+      color: white;
+    }
+
+    /* alerts */
+    .alert {
+      border-radius: 40px;
+      border: none;
+      background: white;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.02);
+      padding: 16px 26px;
+      font-weight: 500;
+    }
+    .alert-success {
+      border-left: 5px solid #2a9d8f;
+    }
+    .alert-danger {
+      border-left: 5px solid #f7594e;
+    }
+
+    /* mobile */
+    .toggle-sidebar {
+      display: none;
+      background: #1e2329;
+      border: none;
+      color: white;
+      font-size: 1.8rem;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 10000;
+      padding: 8px 16px;
+      border-radius: 40px;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      .content {
+        margin-left: 0;
+        width: 100%;
+        padding: 20px;
+      }
+      .toggle-sidebar {
+        display: block;
+      }
+      .stats-row {
+        flex-direction: column;
+        gap: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button class="toggle-sidebar" id="toggleSidebar">☰</button>
+  <div class="dashboard-wrapper">
+    <!-- SIDEBAR (preserved) -->
+    <div class="sidebar" id="sidebar">
+      <h2>Admin&nbsp;Panel</h2>
+      <a href="/dashboard" class="active">📊 Generate Referral Code</a>
+      <a href="/viewReferralcodes">🔗 View Referral codes</a>
+      <a href="/setFreezingPoint">❄️ Set Freezing Point</a>
+      <a href="/setOptimizationCount">⚙️ Set Optimization Count</a>
+     <!-- <a href="/withdrawals">💰 View Withdrawals</a>-->
+      <a href="/adminamount">✎ Edit User Balance/VIP</a>
+      <a href="/user-stats">📈 View Balance & VIP</a>
+      <a href="/editdeposit">📦 Edit Deposit / frozen</a>
+      <a href="/reset-profits">⟲ RESET PROFITS</a>
+      <a href="/userAmounts">🔻 NEGATIVE AMOUNTS</a>
+      <a href="/admin/users">👥 USER STATUS (adjust)</a>
+      <a href="/resetOptimizationActivity">🔄 Reset Opt. Activity</a>
+      <a href="/optimization-activity">📋 View Opt. Activity</a>
+      <!-- logout inside sidebar -->
+      <div style="flex:1;"></div>
+      <a href="/admin/logout" class="logout-button">🚪 Log Out</a>
+    </div>
+
+    <!-- MAIN DASHBOARD CONTENT -->
+    <div class="content">
+      <div class="page-header">
+        <h1>Dashboard · overview</h1>
+        <div class="badge-version">live user stats</div>
+      </div>
+
+      <!-- MESSAGES (if any) -->
+      <% if (message) { %>
+        <div class="alert alert-success"><%= message %></div>
+      <% } %>
+      <% if (error) { %>
+        <div class="alert alert-danger"><%= error %></div>
+      <% } %>
+
+      <!-- 
+        USER STATS SECTION (numbers + statuses)
+        We assume the server passes: userStats = { total, pending, active, banned }
+        If not available, we show fallback – but we'll fill with real counts from your controller.
+      -->
+      <div class="stats-row">
+        <!-- total users -->
+        <div class="stat-card total">
+          <div class="stat-label">📋 TOTAL REGISTERED</div>
+          <div class="stat-number"><%= userStats ? userStats.total : 0 %></div>
+          <div class="stat-detail">all accounts</div>
+        </div>
+        <!-- pending -->
+        <div class="stat-card pending">
+          <div class="stat-label">⏳ PENDING</div>
+          <div class="stat-number"><%= userStats ? userStats.pending : 0 %></div>
+          <div class="stat-detail">awaiting activation</div>
+        </div>
+        <!-- active -->
+        <div class="stat-card active">
+          <div class="stat-label">✅ ACTIVE</div>
+          <div class="stat-number"><%= userStats ? userStats.active : 0 %></div>
+          <div class="stat-detail">verified &amp; active</div>
+        </div>
+        <!-- banned -->
+        <div class="stat-card banned">
+          <div class="stat-label">⛔ BANNED</div>
+          <div class="stat-number"><%= userStats ? userStats.banned : 0 %></div>
+          <div class="stat-detail">restricted accounts</div>
+        </div>
+      </div>
+
+      <!-- quick status legend (optional, just for style) -->
+      <div class="quick-status">
+        <span class="badge-status"><i class="i-pending"></i> pending</span>
+        <span class="badge-status"><i class="i-active"></i> active</span>
+        <span class="badge-status"><i class="i-banned"></i> banned</span>
+        <span style="margin-left: auto; color:#7b8a9b;">last updated · live</span>
+      </div>
+
+      <!-- 
+        MANAGEMENT CARDS (existing actions, all preserved) 
+        only the header area now shows dashboard stats
+      -->
+      <div class="card-grid">
+        <!-- Generate Referral Code -->
+        <div class="card">
+          <h5 class="card-title">Generate Referral Code</h5>
+          <p class="card-text">Create and manage unique referral codes for users.</p>
+          <a href="/dashboard" class="btn btn-info">Manage</a>
+        </div>
+        <!-- View Referral Codes -->
+        <div class="card">
+          <h5 class="card-title">View Referral Codes</h5>
+          <p class="card-text">Manage and view all Referral codes</p>
+          <a href="/viewReferralcodes" class="btn btn-info">View</a>
+        </div>
+        <!-- Set Freezing Point -->
+        <div class="card">
+          <h5 class="card-title">Set Freezing Point</h5>
+          <p class="card-text">Adjust the freezing point for user accounts.</p>
+          <a href="/setFreezingPoint" class="btn btn-info">Adjust</a>
+        </div>
+        <!-- Set Optimization Count -->
+        <div class="card">
+          <h5 class="card-title">Set Optimization Count</h5>
+          <p class="card-text">Configure optimization counts for user limits.</p>
+          <a href="/setOptimizationCount" class="btn btn-info">Set Count</a>
+        </div>
+        <!-- View Withdrawals
+        <div class="card">
+          <h5 class="card-title">View Withdrawals</h5>
+          <p class="card-text">Manage and view all user withdrawal requests.</p>
+          <a href="/withdrawals" class="btn btn-info">View</a>
+        </div> -->
+        <!-- Edit User Balance and VIP Level -->
+        <div class="card">
+          <h5 class="card-title">Edit User Balance / VIP</h5>
+          <p class="card-text">Edit User Balance, Frozen amount and VIP Level</p>
+          <a href="/adminamount" class="btn btn-info">Adjust</a>
+        </div>
+        <!-- View User Balance and VIP Level -->
+        <div class="card">
+          <h5 class="card-title">View Balance & VIP</h5>
+          <p class="card-text">View User Balance, Today's Profit and VIP Level</p>
+          <a href="/user-stats" class="btn btn-info">View</a>
+        </div>
+        <!-- Edit deposit frozen pending -->
+        <div class="card">
+          <h5 class="card-title">Edit Deposit / frozen</h5>
+          <p class="card-text">Edit users Deposit, frozen and pending amounts</p>
+          <a href="/editdeposit" class="btn btn-info">Edit</a>
+        </div>
+        <!-- Reset profits -->
+        <div class="card">
+          <h5 class="card-title">Reset profits</h5>
+          <p class="card-text">Reset all users profits to zero</p>
+          <a href="/reset-profits" class="btn btn-info">Reset</a>
+        </div>
+        <!-- NEGATIVE AMOUNTS -->
+        <div class="card">
+          <h5 class="card-title">NEGATIVE AMOUNTS</h5>
+          <p class="card-text">View all users negative amounts</p>
+          <a href="/userAmounts" class="btn btn-info">View</a>
+        </div>
+        <!-- USERS STATUS -->
+        <div class="card">
+          <h5 class="card-title">👥 USER STATUS</h5>
+          <p class="card-text">View all users status and also adjust it</p>
+          <a href="/admin/users" class="btn btn-info">View/Adjust</a>
+        </div>
+        <!-- RESET OPTIMIZATION ACTIVITY -->
+        <div class="card">
+          <h5 class="card-title">Reset Opt. Activity</h5>
+          <p class="card-text">Reset optimization activity for a specific user</p>
+          <a href="/resetOptimizationActivity" class="btn btn-info">Reset</a>
+        </div>
+        <!-- VIEW OPTIMIZATION ACTIVITY -->
+        <div class="card">
+          <h5 class="card-title">View Opt. Activity</h5>
+          <p class="card-text">View all users status Optimization Activity</p>
+          <a href="/optimization-activity" class="btn btn-info">View</a>
+        </div>
+      </div> <!-- end card grid -->
+    </div> <!-- end content -->
+  </div> <!-- end wrapper -->
+
+  <!-- Notification simulation -->
+  <div id="notification" style="position: fixed; top: 20px; right: 20px; background: #1e2329; color: white; padding: 15px 28px; border-radius: 60px; display: none; z-index: 10000; font-weight:500; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+    ⚡ New withdrawal request received!
+  </div>
+
+  <script>
+    // toggle sidebar on mobile
+    const toggleBtn = document.getElementById('toggleSidebar');
+    const sidebar = document.getElementById('sidebar');
+    toggleBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+    });
+
+    // notification example (same as original)
+    function showNotification() {
+      const notification = document.getElementById('notification');
+      notification.style.display = 'block';
+      setTimeout(() => {
+        notification.style.display = 'none';
+      }, 3000);
+    }
+    // simulate new data after 7 seconds
+    setTimeout(showNotification, 7000);
+  </script>
+</body>
+</html>

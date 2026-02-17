@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Registration</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+  <style>
+    /* Center the container */
+    body, html {
+      height: 100%;
+       background-color: rgb(61, 128, 194);
+    }
+    .center-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    /* Card styling */
+    .card {
+      width: 100%;
+      max-width: 450px;
+      padding: 20px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+       background-color: rgb(61, 128, 194);
+    }
+
+    /* Primary button color */
+    .btn-info {
+      background-color: #29c6c0;
+      border: none;
+    }
+    .btn-info:hover {
+      background-color: #29c6c0;
+    }
+
+    /* Custom styling for input fields */
+    .form-group {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+    .form-group label {
+      position: absolute;
+      top: 50%;
+      left: 15px;
+      transform: translateY(-50%);
+      color: #151616;
+      font-weight: 500;
+      pointer-events: none;
+      transition: all 0.2s ease;
+    }
+    .form-control {
+      padding: 10px 15px;
+      padding-left: 80px; /* space for right alignment */
+      text-align: right;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      box-shadow: none;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: #aaafaf;
+      box-shadow: none;
+    }
+
+    /* Label effect when input is active */
+    .form-control:focus + label,
+    .form-control:not(:placeholder-shown) + label {
+      top: -15px;
+      left: 7px;
+      font-size: 16px;
+      color: #080808;
+    }
+ /* Custom logo styling */
+ .logo-container {
+      display: flex;
+      justify-content: center;
+        }
+    .logo-container img{
+      height: 80px;
+      width: 250px
+    }
+    .back-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .back-link a {
+      color: #29c6c0;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container center-container">
+    <div class="card">
+      
+      <!-- Styled logo text at the top -->
+      <div class="logo-container">
+        <img src="images/bestbuy-logo.png" alt="BSS Logo">
+      </div>
+
+      <h2 class="text-center mb-4">Admin Registration</h2>
+
+      <% if (error) { %>
+        <div class="alert alert-danger text-center"><%= error %></div>
+      <% } %>
+
+      <form action="/adminregister" method="POST">
+        <div class="form-group">
+          <input type="text" class="form-control" name="username" placeholder=" " required>
+          <label for="username">Username</label>
+        </div>
+        <div class="form-group">
+          <input type="password" class="form-control" name="password" placeholder=" " required>
+          <label for="password">Password</label>
+        </div>
+        <div class="form-group">
+          <input type="password" class="form-control" name="confirmPassword" placeholder=" " required>
+          <label for="confirmPassword">Confirm Password</label>
+        </div>
+        <button type="submit" class="btn btn-info btn-block">Register</button>
+      </form>
+      <div class="back-link">
+        <a href="/admin/dashboard">Back to Dashboard</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

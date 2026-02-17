@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Withdrawals</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .table-container {
+      margin-top: 40px;
+      max-width: 90%;
+    }
+    .search-bar-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .search-bar {
+      max-width: 300px;
+    }
+    .back-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .back-link a {
+      color: #F7594E;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5 table-container">
+    <h2 class="text-center">Withdrawal Records</h2>
+
+    <!-- Search Bar -->
+    <div class="search-bar-container">
+      <input
+        type="text"
+        id="searchInput"
+        class="form-control search-bar"
+        placeholder="Search by Username"
+        aria-label="Search"
+      >
+    </div>
+
+    <table class="table table-bordered table-hover mt-4">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Withdraw Amount</th>
+          <th>Wallet Address</th>
+          <th>Date</th>
+          <th>Action</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="withdrawalsTableBody">
+        <% withdrawals.forEach(withdrawal => { %>
+          <tr id="withdrawal-<%= withdrawal._id %>">
+            <td><%= withdrawal.username %></td>
+            <td><%= withdrawal.withdrawAmount.toFixed(2) %></td>
+            <td>
+              <span><%= withdrawal.walletAddress %></span>
+              <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('<%= withdrawal.walletAddress %>')">Copy</button>
+            </td>
+            <td><%= withdrawal.createdAt.toLocaleString() %></td>
+            <td>
+              <button class="btn btn-success btn-sm" onclick="updateStatus('<%= withdrawal._id %>', 'success')">Accept</button>
+              <button class="btn btn-danger btn-sm" onclick="updateStatus('<%= withdrawal._id %>', 'rejected')">Reject</button>
+              <button class="btn btn-dark btn-sm" onclick="deleteWithdrawal('<%= withdrawal._id %>')">Delete</button>
+            </td>
+            <td><%= withdrawal.status %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <div class="back-link">
+        <a href="/admin/dashboard">Back to Dashboard</a>
+      </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    // Copy wallet address to clipboard
+    function copyToClipboard(address) {
+      navigator.clipboard.writeText(address)
+        .then(() => alert('Wallet address copied to clipboard'))
+        .catch(err => alert('Failed to copy wallet address'));
+    }
+
+    // Update withdrawal status
+    async function updateStatus(withdrawalId, status) {
+      if (!confirm(`Are you sure you want to ${status === 'success' ? 'accept' : 'reject'} this withdrawal?`)) return;
+
+      try {
+        const response = await fetch(`/withdrawals/${withdrawalId}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+          alert(data.message);
+          const row = document.getElementById(`withdrawal-${withdrawalId}`);
+          row.style.opacity = "0.5"; // Optional: Indicate status change visually
+        } else {
+          alert('Error updating status: ' + data.message);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error updating status');
+      }
+    }
+
+    // Delete withdrawal
+    async function deleteWithdrawal(withdrawalId) {
+      if (!confirm('Are you sure you want to delete this withdrawal?')) return;
+
+      try {
+        const response = await fetch(`/withdrawals/${withdrawalId}`, { method: 'DELETE' });
+        const data = await response.json();
+
+        if (response.ok) {
+          alert(data.message);
+          document.getElementById(`withdrawal-${withdrawalId}`).remove();
+        } else {
+          alert('Error deleting withdrawal: ' + data.message);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error deleting withdrawal');
+      }
+    }
+
+    // AJAX Search
+    $(document).ready(function () {
+      $('#searchInput').on('keyup', function () {
+        const query = $(this).val().trim();
+
+        $.ajax({
+          url: '/withdrawals/search', // Adjust endpoint if needed
+          method: 'GET',
+          data: { username: query },
+          success: function (response) {
+            const tbody = $('#withdrawalsTableBody');
+            tbody.empty();
+
+            if (response.withdrawals && response.withdrawals.length > 0) {
+              response.withdrawals.forEach(withdrawal => {
+                tbody.append(`
+                  <tr id="withdrawal-${withdrawal._id}">
+                    <td>${withdrawal.username}</td>
+                    <td>${withdrawal.withdrawAmount.toFixed(2)}</td>
+                    <td>
+                      <span>${withdrawal.walletAddress}</span>
+                      <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('${withdrawal.walletAddress}')">Copy</button>
+                    </td>
+                    <td>${new Date(withdrawal.createdAt).toLocaleString()}</td>
+                    <td>
+                      <button class="btn btn-success btn-sm" onclick="updateStatus('${withdrawal._id}', 'success')">Accept</button>
+                      <button class="btn btn-danger btn-sm" onclick="updateStatus('${withdrawal._id}', 'rejected')">Reject</button>
+                      <button class="btn btn-dark btn-sm" onclick="deleteWithdrawal('${withdrawal._id}')">Delete</button>
+                    </td>
+                    <td>${withdrawal.status}</td>
+                  </tr>
+                `);
+              });
+            } else {
+              tbody.append('<tr><td colspan="6" class="text-center">No withdrawals found</td></tr>');
+            }
+          },
+          error: function () {
+            console.error('Error fetching search results');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

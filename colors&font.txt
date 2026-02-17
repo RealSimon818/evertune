@@ -1,0 +1,153 @@
+# Evertune Brand Design Prompt for AI
+
+## Design Overview
+Create a modern, professional SaaS marketing design with a clean, energetic aesthetic that conveys innovation in AI search optimization. The design should feel contemporary, trustworthy, and data-driven while maintaining visual warmth.
+
+## Color Palette
+
+### Primary Colors
+- **Brand Coral Red**: #F7594E (Primary CTA buttons, logo, key highlights)
+- **Pure White**: #FFFFFF (Backgrounds, text on dark surfaces)
+- **Deep Black**: #1B1B1B (Primary text, icons, footer backgrounds)
+
+### Gradient Colors (for backgrounds and accent elements)
+- **Cream/Peach**: #FFF9F6 (rgba(255, 249, 246, 1))
+- **Teal/Turquoise**: #69D7DE (rgba(105, 215, 222, 1))
+- **Warm Beige**: #F9DCB7 (rgba(249, 220, 183, 1))
+- **Off-White**: #FDFEFE (rgba(253, 254, 254, 1))
+
+### Usage Guidelines
+- Use **#F7594E coral red** sparingly for CTAs, important highlights, and brand accents
+- Apply **gradient backgrounds** using the cream, teal, beige, and off-white colors in angular or radial patterns
+- Use **medium gray tones** for secondary text
+- Maintain **high contrast** with black text on white backgrounds
+
+## Typography
+
+### Font Families (in order of priority)
+1. **Montserrat** (weights: 100-900, regular and italic)
+   - Primary headings
+   - Navigation elements
+   
+2. **Manrope** (weights: 300-700)
+   - Body text
+   - Secondary headings
+   
+3. **Red Hat Display** (weights: 300-700)
+   - Feature callouts
+   
+4. **DM Sans** (weight: 500)
+   - UI elements, search prompts
+   
+5. **Roboto** & **Source Sans Pro** (weights: 300-700)
+   - Fallback options
+
+### Typography Hierarchy
+- **H1 Headlines**: Large, bold, using Montserrat or Manrope
+- **H2-H3 Subheadings**: Medium weight, clear hierarchy
+- **Body Text**: Clean, readable paragraphs with generous line spacing
+- **Emphasis Text**: Use *italic* styling with medium-colored text for secondary information
+
+## Design Style & Aesthetic
+
+### Visual Characteristics
+- **Modern minimalism** with ample white space
+- **Card-based layouts** with subtle shadows
+- **Rounded corners** (border-radius: 50px for buttons, softer for cards)
+- **Gradient backgrounds** with angular or radial effects (using mix-blend-mode: plus-darker)
+- **Material Design icons** (rounded style)
+
+### Layout Principles
+- **Grid-based design**: 2-column and 3-column grids for content
+- **Generous padding**: Large sections with breathing room
+- **Centered alignment** for hero content
+- **Width constraints**: Container-base, container-wide classes for responsive layouts
+
+### Component Styles
+
+#### Buttons
+- **Primary Button**: Coral red (#F7594E) background, white text, rounded (50px)
+- **Secondary Button**: White background, dark text/border
+- **Tertiary Button**: Transparent/outlined style
+
+#### Cards
+- **Background**: White with subtle gradient accents
+- **Border**: None or very subtle
+- **Shadow**: Soft (0 4px 14px rgba(0,0,0,0.08))
+- **Padding**: Generous internal spacing
+
+#### Icons & Graphics
+- **Style**: Line icons with rounded edges
+- **Size**: 48px x 48px for feature icons
+- **Color**: Use gradient masks over icons for visual interest
+
+### Interactive Elements
+- **Hover states**: Subtle scale or color transitions
+- **Animations**: Fade-in effects (opacity: 0 to 1) on scroll
+- **Transitions**: Smooth, professional (ease timing)
+
+## Content Sections Style
+
+### Hero Section
+- Large bold headline centered
+- Animated search prompt with typewriter effect
+- Gradient background with soft colors
+- Prominent CTA button in coral red
+
+### Feature Cards
+- 3-column grid layout
+- Icons at top with gradient overlay
+- Heading + description format
+- Clean white background
+
+### Testimonials
+- Logo + quote + author format
+- Quotation marks as design element
+- Author photo (circular)
+- Light background with subtle accent
+
+### Stats/Metrics
+- Large numbers (H1 size)
+- Supporting text below
+- Grid layout (3 columns)
+- High contrast for readability
+
+## Imagery Style
+- **Product Screenshots**: Clean, realistic UI mockups with subtle shadows
+- **Illustrations**: Minimal, modern, geometric if needed
+- **Logos**: Partner/client logos in grayscale or single color
+- **Gradients**: Angular gradients (conic-gradient) with warm-to-cool color transitions
+
+## Brand Voice (Visual Expression)
+- **Professional but approachable**
+- **Data-driven and trustworthy**
+- **Modern and innovative**
+- **Energetic but not overwhelming**
+
+## Do's
+✓ Use generous white space
+✓ Maintain high text contrast for readability
+✓ Apply coral red strategically for CTAs
+✓ Use gradient backgrounds subtly
+✓ Keep typography hierarchy clear
+✓ Implement smooth animations
+✓ Use rounded corners consistently
+
+## Don'ts
+✗ Overuse the coral red color
+✗ Use harsh, jarring gradients
+✗ Clutter the design with too many elements
+✗ Use fonts outside the approved family list
+✗ Create low-contrast text combinations
+✗ Use sharp corners on buttons
+✗ Overwhelm with too many competing visual elements
+
+## Responsive Considerations
+- Mobile: Single column, larger tap targets
+- Tablet: 2-column grids where appropriate
+- Desktop: Full 3-column grids, wider containers
+- Maintain brand consistency across all breakpoints
+
+---
+
+**Summary**: Design in the style of a modern SaaS platform with Evertune's coral red (#F7594E) as the energetic accent color, clean typography using Montserrat/Manrope, generous white space, subtle gradients, and card-based layouts that convey professionalism and innovation in AI technology.

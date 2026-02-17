@@ -1,0 +1,78 @@
+<!-- views/set-daily-limit.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Set Daily Limit</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+     .back-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .back-link a {
+      color: #F7594E;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+    }
+    .dashboard-container {
+      max-width: 500px;
+      margin: 5% auto;
+      background-color: #ffffff;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .dashboard-title {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #F7594E;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .form-label {
+      font-weight: 500;
+      color: #495057;
+    }
+    .btn-custom {
+      width: 100%;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <div class="dashboard-title">Set Daily Limit</div>
+
+    <form action="/setDailyLimit" method="POST">
+      <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" required>
+      </div>
+      <div class="mb-3">
+        <label for="dailyLimit" class="form-label">Daily Limit</label>
+        <input type="number" class="form-control" id="dailyLimit" name="dailyLimit" placeholder="Enter daily limit" required>
+      </div>
+      <button type="submit" class="btn btn-info btn-custom">Save Daily Limit</button>
+    </form>
+
+    <div class="back-link">
+      <a href="/admin/dashboard">Back to Dashboard</a>
+    </div>
+
+    <% if (typeof message !== 'undefined') { %>
+      <div id="resultMessage" class="text-success text-center mt-3"><%= message %></div>
+    <% } %>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
