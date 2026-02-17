@@ -11,7 +11,7 @@ const ReferralCode = require('../models/ReferralCode');
 const AdminAmount = require('../models/AdminAmount');
 const User = require('../models/User'); 
 const FrozenAmount = require('../models/FrozenAmount');
-const Deposit = require('../models/Deposit');
+const Deposit = require('../models/deposit');
 const OptimizationActivity = require('../models/OptimizationActivity');
 
 
