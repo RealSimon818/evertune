@@ -20,8 +20,11 @@ router.get('/start-page', checkAuthenticated, async (req, res) => {
     // Fetch user data from Amount collection
     const amountData = await Amount.findOne({ username });
     
-    // Fetch user status
+    // Fetch user status and invitation code from User collection
     const user = await User.findOne({ username });
+    
+    // Get invitation code from user data
+    const invitationCode = user?.invitationCode || 'N/A';
     
     // Fetch completed optimizations to get count
     const completedOptimizations = await Optimization.find({ 
@@ -59,12 +62,14 @@ router.get('/start-page', checkAuthenticated, async (req, res) => {
         totalBalance: '0.00',
         frozenAmount: '0.00',
         todaysProfit: '0.00',
+        totalProfits: '0.00',
         vipLevel,
         optimizationCount,
         optimizationCout,
         maxOptimizationCount,
         depositAmount,
         freezingPoint,
+        invitationCode, // Add invitation code
         message: 'Welcome to Start Page'
       });
     }
@@ -75,12 +80,14 @@ router.get('/start-page', checkAuthenticated, async (req, res) => {
       totalBalance: parseFloat(amountData.totalBalance || 0).toFixed(2),
       frozenAmount: parseFloat(amountData.frozenAmount || 0).toFixed(2),
       todaysProfit: parseFloat(amountData.todaysProfit || 0).toFixed(2),
+      totalProfits: parseFloat(amountData.totalProfits || 0).toFixed(2),
       vipLevel,
       optimizationCount,
       optimizationCout,
       maxOptimizationCount,
       depositAmount,
       freezingPoint,
+      invitationCode, // Add invitation code
       message: 'Welcome back!'
     });
     
@@ -93,17 +100,19 @@ router.get('/start-page', checkAuthenticated, async (req, res) => {
       totalBalance: '0.00',
       frozenAmount: '0.00',
       todaysProfit: '0.00',
+      totalProfits: '0.00',
       vipLevel: 'VIP1',
       optimizationCount: 0,
       optimizationCout: 0,
       maxOptimizationCount: 40,
       depositAmount: '0.00',
       freezingPoint: 103,
+      invitationCode: 'N/A', // Add invitation code
       message: 'Welcome back!'
     });
   }
 });
-
+    
 // GET /api/start-page/history - Fetch optimization history for the start page modal
 router.get('/api/start-page/history', checkAuthenticated, async (req, res) => {
   try {
@@ -150,7 +159,7 @@ router.post('/api/start-page/submit-history-optimizations', checkAuthenticated, 
   try {
     const username = req.session.username;
 
-    // Fetch pending and frozen optimizations separately
+    // Fetch pending and frozen optimizations
     const pendingOptimizations = await Optimization.find({ username, status: 'pending' }).sort({ createdAt: -1 });
     const frozenOptimizations = await Optimization.find({ username, status: 'frozen' }).sort({ createdAt: -1 });
 
@@ -165,16 +174,12 @@ router.post('/api/start-page/submit-history-optimizations', checkAuthenticated, 
       return res.status(404).json({ success: false, message: 'User balance data not found' });
     }
 
-    // Get the most recent optimization count
+    // Get the most recent optimization count for freezing point check
     const latestOptimization = pendingOptimizations.length > 0 ? pendingOptimizations[0] : frozenOptimizations[0];
     const optimizationCount = latestOptimization ? latestOptimization.optimizationCount || 0 : 0;
 
-    console.log(`History Submit - Optimization Count for user ${username}: ${optimizationCount}`);
-
     // Log optimization count and freezing point for debugging
     const freezingPoint = Number(amountData?.freezingPoint) || 103;
-    console.log(`History Submit - Optimization Count for user ${username}: ${optimizationCount}`);
-    console.log(`History Submit - Freezing Point for user ${username}: ${freezingPoint}`);
 
     // Check if the latest optimization count exceeds the freezing point
     if (optimizationCount >= freezingPoint) {
@@ -186,9 +191,8 @@ router.post('/api/start-page/submit-history-optimizations', checkAuthenticated, 
       });
     }
 
-    // Process optimizations
+    // Process optimizations - just add profits
     let totalProfit = 0;
-    let depositAmountToAdd = 0;
 
     // Complete pending optimizations
     for (const optimization of pendingOptimizations) {
@@ -204,31 +208,20 @@ router.post('/api/start-page/submit-history-optimizations', checkAuthenticated, 
       await optimization.save();
     }
 
-    // Add deposit amount **only if both pending and frozen exist**
-    if (pendingOptimizations.length > 0 && frozenOptimizations.length > 0) {
-      // Fetch the user's deposit amount
-      const Deposit = require('../models/Deposit');
-      const depositData = await Deposit.findOne({ username });
-      if (depositData) {
-        depositAmountToAdd = depositData.amount;
-      }
-    }
-
-    // Update user's balance
+    // Update user's balance - ADD profits to all three fields
     amountData.totalBalance = (parseFloat(amountData.totalBalance) + parseFloat(totalProfit)).toFixed(2);
-    if (depositAmountToAdd > 0) {
-      amountData.totalBalance = (parseFloat(amountData.totalBalance) + parseFloat(depositAmountToAdd)).toFixed(2);
-    }
     amountData.todaysProfit = (parseFloat(amountData.todaysProfit) + parseFloat(totalProfit)).toFixed(2);
+    amountData.totalProfits = (parseFloat(amountData.totalProfits) + parseFloat(totalProfit)).toFixed(2); // Add to lifetime profits
     
     await amountData.save();
 
-    console.log(`History Submit - Optimizations for user ${username} completed. Total profit: ${totalProfit}, Deposit Amount Added: ${depositAmountToAdd}`);
+    console.log(`History Submit - Optimizations for user ${username} completed. Total profit: ${totalProfit}`);
     res.json({
       success: true,
       message: 'All optimizations completed successfully.',
       updatedTodaysProfit: amountData.todaysProfit,
       updatedTotalBalance: amountData.totalBalance,
+      updatedTotalProfits: amountData.totalProfits,
     });
 
   } catch (error) {

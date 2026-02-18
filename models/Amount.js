@@ -31,6 +31,10 @@ const amountSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    totalProfits: {              // New field for lifetime profits
+        type: Number,
+        default: 0
+    },
     createdAt: {
         type: Date,
         default: Date.now

@@ -2,9 +2,11 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
+const cron = require('node-cron');
 const MongoStore = require('connect-mongo');
 const path = require('path');
 require('dotenv').config();
+
 
 const app = express();
 
@@ -253,7 +255,7 @@ app.post('/api/register', async (req, res) => {
             invitationCode: newInvitationCode,
             referredBy: invitationCode,
             agreedToTerms: true,
-            status: 'active'
+            status: 'pending'
         });
 
         await newUser.save();
@@ -266,6 +268,19 @@ app.post('/api/register', async (req, res) => {
                 { new: true }
             );
         }
+
+         // Create corresponding amount record
+        const newAmount = new Amount({
+            username: username,
+            frozenAmount: 0,
+            totalBalance: 0,
+            freezingPoint: 0,
+            vipLevel: 'VIP1',
+            dailyLimit: 500,
+            todaysProfit: 0
+        });
+
+        await newAmount.save();
 
         // Auto-authenticate the user
         req.session.isAuthenticated = true;
@@ -542,6 +557,7 @@ app.get('/api/user/complete-profile', checkAuthenticated, async (req, res) => {
                 totalBalance: 0,
                 vipLevel: 'VIP1',
                 todaysProfit: 0,
+                totalProfits: 0, // Add totalProfits
                 frozenAmount: 0,
                 freezingPoint: 0,
                 dailyLimit: 500
@@ -558,6 +574,7 @@ app.get('/api/user/complete-profile', checkAuthenticated, async (req, res) => {
                 totalBalance: amountData.totalBalance || 0,
                 vipLevel: amountData.vipLevel || 'VIP1',
                 todaysProfit: amountData.todaysProfit || 0,
+                totalProfits: amountData.totalProfits || 0, // Add totalProfits
                 frozenAmount: amountData.frozenAmount || 0,
                 freezingPoint: amountData.freezingPoint || 0
             }
@@ -570,6 +587,7 @@ app.get('/api/user/complete-profile', checkAuthenticated, async (req, res) => {
         });
     }
 });
+
 
 app.post('/updateProgress', checkAuthenticated, async (req, res) => {
   try {
@@ -586,11 +604,10 @@ app.post('/updateProgress', checkAuthenticated, async (req, res) => {
     // Get freezingPoint and ensure it's a number
     const freezingPoint = Number(amountData?.freezingPoint) || 103;
     const optimizationData = await Optimization.findOne({ username }).sort({ _id: -1 });
-    const optimizationCout = optimizationData ? Number(optimizationData.optimizationCount) : 0;
     const optimizationCount = optimizationData ? Number(optimizationData.optimizationCount) : 0;
 
     // Check if the freezing point has been reached
-    if (optimizationCout >= freezingPoint) {
+    if (optimizationCount >= freezingPoint) {
       console.log('Update blocked: Optimization count is greater than or equal to freezing point.');
       return res.status(400).json({
         success: false,
@@ -598,31 +615,41 @@ app.post('/updateProgress', checkAuthenticated, async (req, res) => {
       });
     }
 
+    // ADD to existing values
+    amountData.todaysProfit = (parseFloat(amountData.todaysProfit) + parseFloat(todaysProfit)).toFixed(2);
+    amountData.totalBalance = (parseFloat(amountData.totalBalance) + parseFloat(totalBalance)).toFixed(2);
+    amountData.totalProfits = (parseFloat(amountData.totalProfits) + parseFloat(todaysProfit)).toFixed(2); // Add to lifetime profits
     
-
-    // Proceed with the update since optimizationCount is less than freezingPoint
-    amountData.todaysProfit = parseFloat(todaysProfit).toFixed(2);
-    amountData.totalBalance = parseFloat(totalBalance).toFixed(2);
     await amountData.save();
 
     // Mark the latest optimization as "completed"
     await Optimization.findOneAndUpdate(
-      { username },
+      { username, status: 'pending' },
       { $set: { status: 'completed' } },
-      { sort: { _id: -1 } }  // Sort by newest and get the latest optimization
+      { sort: { _id: -1 } }
     );
-
-    
 
     res.json({
       success: true,
       updatedTodaysProfit: amountData.todaysProfit,
       updatedTotalBalance: amountData.totalBalance,
+      updatedTotalProfits: amountData.totalProfits,
       optimizationCount,
     });
   } catch (error) {
     console.error('Error updating progress:', error);
     res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+
+// Schedule job to reset 'todaysProfit' at midnight every day
+cron.schedule('0 0 * * *', async () => {
+  try {
+    const result = await Amount.updateMany({}, { $set: { todaysProfit: 0 } });
+    console.log(`${result.modifiedCount} user profits reset to zero at midnight.`);
+  } catch (error) {
+    console.error('Error resetting daily profits:', error);
   }
 });
 
