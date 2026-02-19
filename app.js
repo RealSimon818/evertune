@@ -992,6 +992,70 @@ app.post('/save-wallet', checkAuthenticated, async (req, res) => {
   }
 });
 
+// Change withdrawal password route - UPDATED VERSION
+app.get('/change-withdrawal-password', checkAuthenticated, (req, res) => {
+  res.render('change-withdrawal-password', { error: null, message: null });
+});
+
+// Change Withdrawal Password API (for both form and API requests)
+app.post('/change-withdrawal-password', checkAuthenticated, async (req, res) => {
+  const { currentPassword, newWithdrawalPassword, confirmWithdrawalPassword } = req.body;
+  const username = req.session.username;
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,16}$/;
+
+  try {
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      if (req.headers['content-type'] === 'application/json') {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+      return res.render('change-withdrawal-password', { error: 'User not found', message: null });
+    }
+
+    // Verify the user's current login password
+    const isPasswordMatch = await bcrypt.compare(currentPassword, user.loginPassword);
+    if (!isPasswordMatch) {
+      if (req.headers['content-type'] === 'application/json') {
+        return res.status(400).json({ success: false, message: 'Incorrect current password' });
+      }
+      return res.render('change-withdrawal-password', { error: 'Incorrect current password', message: null });
+    }
+
+    // Validate new withdrawal password
+    if (newWithdrawalPassword !== confirmWithdrawalPassword) {
+      if (req.headers['content-type'] === 'application/json') {
+        return res.status(400).json({ success: false, message: 'New withdrawal passwords do not match' });
+      }
+      return res.render('change-withdrawal-password', { error: 'New withdrawal passwords do not match', message: null });
+    }
+    
+   
+    // Hash the new withdrawal password and update it
+    const hashedNewWithdrawalPassword = await bcrypt.hash(newWithdrawalPassword, 10);
+    user.withdrawalPassword = hashedNewWithdrawalPassword;
+    await user.save();
+
+    if (req.headers['content-type'] === 'application/json') {
+      return res.json({ 
+        success: true, 
+        message: 'Withdrawal password updated successfully.',
+        redirect: '/change-withdrawal-password'
+      });
+    }
+    
+    res.render('change-withdrawal-password', { error: null, message: 'Withdrawal password updated successfully.' });
+    
+  } catch (error) {
+    console.error('Change withdrawal password error:', error);
+    if (req.headers['content-type'] === 'application/json') {
+      return res.status(500).json({ success: false, message: 'Server error' });
+    }
+    res.status(500).render('change-withdrawal-password', { error: 'Server error', message: null });
+  }
+});
+
+
 // Route to display T&C page
 app.get('/terms', async (req, res) => {
   try {
