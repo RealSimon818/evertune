@@ -51,7 +51,7 @@ router.get('/start-page', checkAuthenticated, async (req, res) => {
     const freezingPoint = Number(amountData?.freezingPoint) || 103;
     
     // Get deposit amount if exists
-    const Deposit = require('../models/Deposit');
+    const Deposit = require('../models/deposit');
     const depositData = await Deposit.findOne({ username });
     const depositAmount = depositData ? parseFloat(depositData.amount).toFixed(2) : '0.00';
     
