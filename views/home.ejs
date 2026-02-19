@@ -139,200 +139,403 @@
         .profile-overlay.show {
             display: block;
         }
-        
-        /* Profile Modal */
-        .profile-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-            z-index: 1032;
-            visibility: hidden;
-            opacity: 0;
-            transition: visibility 0.3s, opacity 0.3s;
-            padding-top: 70px; /* Height of navbar */
-        }
-        
-        .profile-modal.show {
-            visibility: visible;
-            opacity: 1;
-        }
-        
-        .profile-modal-content {
-            background: var(--pure-white);
-            border-radius: 0 0 20px 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 900px;
-            max-height: calc(100vh - 70px);
-            overflow-y: auto;
-            transform: translateY(-100%);
-            transition: transform 0.4s ease;
-            position: relative;
-        }
-        
-        .profile-modal.show .profile-modal-content {
-            transform: translateY(0);
-        }
-        
-        .profile-modal-header {
-            padding: 25px 30px;
-            background: linear-gradient(135deg, var(--cream-peach) 0%, var(--warm-beige) 100%);
-            border-radius: 0 0 20px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .profile-modal-header .evertune-logo {
-            width: 150px;
-            height: 35px;
-        }
-        
-        .profile-modal-close {
-            background: none;
-            border: none;
-            font-size: 2rem;
-            color: var(--deep-black);
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-        }
-        
-        .profile-modal-close:hover {
-            background-color: rgba(27, 27, 27, 0.1);
-            transform: rotate(90deg);
-        }
-        
-        .profile-modal-body {
-            padding: 30px;
-        }
-        
-        /* User Info Cards */
-        .user-info-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
-            padding-bottom: 30px;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
-        }
-        
-        .info-card {
-            background: linear-gradient(135deg, var(--cream-peach) 0%, var(--off-white) 100%);
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: var(--card-shadow);
-        }
-        
-        .info-label {
-            font-size: 0.9rem;
-            color: var(--gray-medium);
-            margin-bottom: 8px;
-        }
-        
-        .info-value {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--deep-black);
-        }
-        
-        /* Profile Links Section */
-        .profile-links-section {
-            margin-bottom: 20px;
-        }
-        
-        .profile-section-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: var(--brand-coral);
-            margin-bottom: 20px;
-            padding-left: 10px;
-            border-left: 4px solid var(--brand-coral);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: color 0.3s ease;
-        }
-        
-        .profile-section-title:hover {
-            color: #e04a40;
-        }
-        
-        .profile-section-title i {
-            font-size: 1rem;
-            transition: transform 0.3s ease;
-        }
-        
-        .profile-section-title.active i {
-            transform: rotate(180deg);
-        }
-        
-        .profile-links-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease;
-        }
-        
-        .profile-links-grid.show {
-            max-height: 500px;
-        }
-        
-        .profile-link-item {
-            background: var(--off-white);
-            border: 1px solid rgba(0,0,0,0.05);
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            text-decoration: none;
-            color: var(--deep-black);
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .profile-link-item i {
-            font-size: 1.5rem;
-            color: var(--brand-coral);
-        }
-        
-        .profile-link-item:hover {
-            background: var(--brand-coral);
-            color: var(--pure-white);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(247, 89, 78, 0.3);
-        }
-        
-        .profile-link-item:hover i {
-            color: var(--pure-white);
-        }
-        
-        .profile-link-item.logout {
-            background: rgba(247, 89, 78, 0.1);
-            border-color: var(--brand-coral);
-        }
-        
-        .profile-link-item.logout:hover {
-            background: var(--brand-coral);
-        }
-        
+        /* ============================================
+   HOMEPAGE PROFILE MODAL - RESPONSIVE CSS
+   ============================================ */
+
+.profile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 1031;
+  display: none;
+}
+
+.profile-overlay.show {
+  display: block;
+}
+
+.profile-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 1032;
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0.3s, opacity 0.3s;
+  padding-top: 70px;
+  overflow-y: auto;
+}
+
+.profile-modal.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+.profile-modal-content {
+  background: var(--pure-white);
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 900px;
+  max-height: calc(100vh - 70px);
+  overflow-y: auto;
+  transform: translateY(-100%);
+  transition: transform 0.4s ease;
+  position: relative;
+}
+
+.profile-modal.show .profile-modal-content {
+  transform: translateY(0);
+}
+
+.profile-modal-header {
+  padding: 22px 28px;
+  background: linear-gradient(135deg, var(--cream-peach) 0%, var(--warm-beige) 100%);
+  border-radius: 0 0 20px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.profile-modal-header .evertune-logo {
+  width: 140px;
+  height: 33px;
+}
+
+.profile-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.9rem;
+  color: var(--deep-black);
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.profile-modal-close:hover {
+  background-color: rgba(27, 27, 27, 0.1);
+  transform: rotate(90deg);
+}
+
+.profile-modal-body {
+  padding: 28px;
+}
+
+/* User Info Cards */
+.user-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.info-card {
+  background: linear-gradient(135deg, var(--cream-peach) 0%, var(--off-white) 100%);
+  border-radius: 12px;
+  padding: 18px 14px;
+  text-align: center;
+  box-shadow: var(--card-shadow);
+}
+
+.info-label {
+  font-size: 0.85rem;
+  color: var(--gray-medium);
+  margin-bottom: 7px;
+  line-height: 1.3;
+}
+
+.info-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--deep-black);
+  word-break: break-all;
+}
+
+/* Profile Links Section */
+.profile-links-section {
+  margin-bottom: 20px;
+}
+
+.profile-section-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--brand-coral);
+  margin-bottom: 18px;
+  padding-left: 10px;
+  border-left: 4px solid var(--brand-coral);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: color 0.3s ease;
+}
+
+.profile-section-title:hover {
+  color: #e04a40;
+}
+
+.profile-section-title i {
+  font-size: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.profile-section-title.active i {
+  transform: rotate(180deg);
+}
+
+.profile-links-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease;
+}
+
+.profile-links-grid.show {
+  max-height: 600px;
+}
+
+.profile-link-item {
+  background: var(--off-white);
+  border: 1px solid rgba(0,0,0,0.05);
+  border-radius: 10px;
+  padding: 10px 10px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--deep-black);
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-link-item i {
+  font-size: 1.4rem;
+  color: var(--brand-coral);
+}
+
+.profile-link-item:hover {
+  background: var(--brand-coral);
+  color: var(--pure-white);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 18px rgba(247, 89, 78, 0.3);
+}
+
+.profile-link-item:hover i {
+  color: var(--pure-white);
+}
+
+.profile-link-item.logout {
+  background: rgba(247, 89, 78, 0.1);
+  border-color: var(--brand-coral);
+}
+
+.profile-link-item.logout:hover {
+  background: var(--brand-coral);
+}
+
+/* ============================================
+   RESPONSIVE BREAKPOINTS
+   ============================================ */
+
+/* Large tablets (992px and below) */
+@media (max-width: 992px) {
+  .profile-modal-content {
+    max-width: 96%;
+  }
+
+  .user-info-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+
+  .profile-links-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Tablets (768px and below) */
+@media (max-width: 768px) {
+  .profile-modal {
+    padding-top: 60px;
+    align-items: flex-start;
+  }
+
+  .profile-modal-content {
+    max-width: 100%;
+    border-radius: 0 0 16px 16px;
+    max-height: calc(100vh - 60px);
+  }
+
+  .profile-modal-header {
+    padding: 14px 18px;
+  }
+
+  .profile-modal-header .evertune-logo {
+    width: 110px;
+    height: 26px;
+  }
+
+  .profile-modal-close {
+    font-size: 1.5rem;
+    width: 36px;
+    height: 36px;
+  }
+
+  .profile-modal-body {
+    padding: 18px;
+  }
+
+  .user-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+  }
+
+  .info-card {
+    padding: 14px 10px;
+  }
+
+  .info-label {
+    font-size: 0.75rem;
+  }
+
+  .info-value {
+    font-size: 1rem;
+  }
+
+  .profile-links-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .profile-link-item {
+    padding: 12px 8px;
+    font-size: 0.78rem;
+    gap: 6px;
+  }
+
+  .profile-link-item i {
+    font-size: 1.3rem;
+  }
+}
+
+/* Small phones (576px and below) */
+@media (max-width: 576px) {
+  .profile-modal {
+    padding-top: 60px;
+  }
+
+  .profile-modal-body {
+    padding: 14px;
+  }
+
+  .profile-modal-header {
+    padding: 12px 14px;
+  }
+
+  .profile-modal-header .evertune-logo {
+    width: 95px;
+    height: 22px;
+  }
+
+  .user-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .info-card {
+    padding: 12px 8px;
+    border-radius: 10px;
+  }
+
+  .info-label {
+    font-size: 0.7rem;
+    margin-bottom: 4px;
+  }
+
+  .info-value {
+    font-size: 0.9rem;
+  }
+
+  .profile-section-title {
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+
+  .profile-links-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .profile-link-item {
+    padding: 10px 8px;
+    font-size: 0.8rem;
+    border-radius: 10px;
+  }
+
+  .profile-link-item i {
+    font-size: 1.4rem;
+  }
+}
+
+/* Extra small phones (400px and below) */
+@media (max-width: 400px) {
+  .user-info-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .info-value {
+    font-size: 0.85rem;
+  }
+
+  .profile-links-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .profile-link-item {
+    padding: 12px 6px;
+    font-size: 0.75rem;
+  }
+
+  .profile-link-item i {
+    font-size: 1.25rem;
+  }
+
+  .profile-modal-header .evertune-logo {
+    width: 85px;
+    height: 20px;
+  }
+}
         /* Hero Text */
         .hero-section {
             padding: 100px 0 60px;
