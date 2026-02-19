@@ -15,6 +15,10 @@ const User = require('./models/User');
 const ReferralCode = require('./models/ReferralCode');
 const Amount = require('./models/Amount');
 const Optimization = require('./models/Optimization');
+const Withdrawal = require('./models/withdrawal');
+const Deposit = require('./models/deposit');
+const Wallet = require('./models/Wallet');
+
 
 // Middleware
 app.use(express.json());
@@ -653,6 +657,340 @@ cron.schedule('0 0 * * *', async () => {
   }
 });
 
+
+// GET route to render the withdrawal page with categorized history
+app.get('/withdraw', checkAuthenticated, async (req, res) => {
+  try {
+    const username = req.session.username;
+
+    // Fetch account balance
+    const amount = await Amount.findOne({ username });
+    const wallet = await Wallet.findOne({ username });
+    if (!amount) {
+      return res.status(404).render('withdraw', { 
+        amount: { totalBalance: "0.00" },
+        reviewing: [], 
+        success: [], 
+        rejected: [], 
+        error: 'Account balance data not found', 
+        message: null 
+      });
+    }
+
+    if (!wallet) {
+      return res.render('withdraw', {
+        walletAddress: null,
+        message: null,
+        error: 'Wallet not found.',
+        amount: { totalBalance: 0 }, // Default balance
+        reviewing: [],
+        success: [],
+        rejected: [],
+      });
+    }
+
+    const deposit = await Deposit.findOne({ username }) || { amount: 0 };
+    // Fetch the latest optimization data
+    const optimizationData = await Optimization.findOne({ username }).sort({ _id: -1 }) || { optimizationCount: 0 };
+
+     // Define constants for freezingPoint and optimizationCount, converting them to numbers
+     const FREEZING_POINT = Number(amount.freezingPoint) || 0;
+     const OPTIMIZATION_COUNT = Number(optimizationData.optimizationCount) || 0;
+
+       // Determine the balance to display
+    let displayBalance;
+    if (FREEZING_POINT > 0 && OPTIMIZATION_COUNT >= FREEZING_POINT) {
+      // Freezing point is valid and reached/exceeded: Show deposit amount
+      displayBalance = `- ${parseFloat(deposit.amount || 0).toFixed(2)}`;
+    } else {
+      // Freezing point is 0 or not yet reached: Show totalBalance
+      displayBalance = parseFloat(amount.totalBalance || 0).toFixed(2);
+    }
+    // Fetch withdrawal history grouped by status
+    const withdrawals = await Withdrawal.find({ username });
+
+    const reviewing = withdrawals.filter(w => w.status === 'reviewing');
+    const success = withdrawals.filter(w => w.status === 'success');
+    const rejected = withdrawals.filter(w => w.status === 'rejected');
+
+    // Render the withdrawal page with categorized history
+    res.render('withdraw', { 
+      walletAddress: wallet.cryptoWalletAddress,
+      amount: { totalBalance: displayBalance }, 
+      reviewing, 
+      success, 
+      rejected, 
+      message: null, 
+      error: null 
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).render('withdraw', { 
+      walletAddress: null,
+      amount: { totalBalance: "0.00" },
+      reviewing: [], 
+      success: [], 
+      rejected: [], 
+      error: 'Server error', 
+      message: null 
+    });
+  }
+});
+
+
+const MAX_WITHDRAWAL_LIMITS = {
+ vip1: 5000,
+  vip2: 10000,
+  vip3: 30000,
+  vip4: 100000
+};
+
+const MIN_WITHDRAWAL_LIMITS = {
+ vip1: 100,
+  vip2: 500,
+  vip3: 1500,
+  vip4: 5000
+};
+
+
+// POST route for withdrawal
+app.post('/withdraw', checkAuthenticated, async (req, res) => {
+  const username = req.session.username;
+  const { withdrawAmount, transactionPassword} = req.body;
+
+  try {
+    const user = await User.findOne({ username });
+    const amount = await Amount.findOne({ username });
+    const wallet = await Wallet.findOne({ username });
+
+      // Redirect to link-wallet if no wallet is found
+      if (!wallet) {
+        req.session.error = 'You need to link your wallet before making a withdrawal.';
+        return res.redirect('/link-wallet');
+      }
+
+    // Fetch withdrawal history grouped by status
+    const withdrawals = await Withdrawal.find({ username });
+    const reviewing = withdrawals.filter(w => w.status === 'reviewing');
+    const success = withdrawals.filter(w => w.status === 'success');
+    const rejected = withdrawals.filter(w => w.status === 'rejected');
+
+    // Format amount to 2 decimal places for display
+    const formattedAmount = {
+      ...amount._doc, // Spread the original amount document
+      totalBalance: amount ? parseFloat(amount.totalBalance).toFixed(2) : "0.00"
+    };
+
+    if (!user || !amount) {
+      return res.status(404).render('withdraw', { 
+        walletAddress: wallet.cryptoWalletAddress,
+        amount: { totalBalance: "0.00" },
+        reviewing, 
+        success, 
+        rejected, 
+        error: 'User or account balance data not found.', 
+        message: null 
+      });
+    }
+
+    // Validate transaction password
+    const isPasswordMatch = await bcrypt.compare(transactionPassword, user.withdrawalPassword);
+    if (!isPasswordMatch) {
+      return res.status(400).render('withdraw', { 
+        walletAddress: wallet.cryptoWalletAddress,
+        amount: formattedAmount, 
+        reviewing, 
+        success, 
+        rejected, 
+        error: 'Incorrect transaction password.', 
+        message: null 
+      });
+    }
+
+    // Get VIP level and corresponding withdrawal limits
+    const vipLevel = amount.vipLevel.toLowerCase();
+    const minimumWithdrawal = MIN_WITHDRAWAL_LIMITS[vipLevel] || 100;
+    const maxWithdrawalLimit = MAX_WITHDRAWAL_LIMITS[vipLevel] || 5000;
+
+    // Validate withdrawal amount
+    if (withdrawAmount < minimumWithdrawal) {
+      return res.status(400).render('withdraw', { 
+        walletAddress: wallet.cryptoWalletAddress,
+        amount: formattedAmount, 
+        reviewing, 
+        success, 
+        rejected, 
+        error: `Minimum withdrawal for ${amount.vipLevel.toUpperCase()} is ${minimumWithdrawal} USDC.`, 
+        message: null 
+      });
+    }
+
+    if (withdrawAmount > maxWithdrawalLimit) {
+      return res.status(400).render('withdraw', { 
+        walletAddress: wallet.cryptoWalletAddress,
+        amount: formattedAmount, 
+        reviewing, 
+        success, 
+        rejected, 
+        error: `Maximum withdrawal for ${amount.vipLevel.toUpperCase()} is ${maxWithdrawalLimit} USDC.`, 
+        message: null 
+      });
+    }
+
+    if (withdrawAmount > amount.totalBalance) {
+      return res.status(400).render('withdraw', { 
+        walletAddress: wallet.cryptoWalletAddress,
+        amount: formattedAmount, 
+        reviewing, 
+        success, 
+        rejected, 
+        error: 'Insufficient balance.', 
+        message: null 
+      });
+    }
+
+    // Check freezing point and pending optimizations
+    const latestOptimization = await Optimization.findOne({ username }).sort({ submissionDate: -1 });
+    if (
+      (amount.freezingPoint && latestOptimization && latestOptimization.optimizationCount >= amount.freezingPoint) ||
+      (latestOptimization && (latestOptimization.status === 'frozen' || latestOptimization.status === 'pending'))
+    ) {
+      return res.status(403).render('withdraw', {
+        walletAddress: wallet.cryptoWalletAddress,
+        amount: formattedAmount, 
+        reviewing, 
+        success, 
+        rejected, 
+        error: 'Withdrawals are not allowed due to pending orders.', 
+        message: null 
+      });
+    }
+
+    // Deduct amount and save withdrawal request
+    amount.totalBalance -= withdrawAmount;
+    amount.totalBalance = parseFloat(amount.totalBalance.toFixed(2)); // Ensure two decimal places
+    await amount.save();
+
+    const newWithdrawal = new Withdrawal({
+      username,
+      withdrawAmount,
+      status: 'reviewing'
+    });
+    await newWithdrawal.save();
+
+    // Update withdrawal history
+    const updatedWithdrawals = await Withdrawal.find({ username });
+    const updatedReviewing = updatedWithdrawals.filter(w => w.status === 'reviewing');
+    const updatedSuccess = updatedWithdrawals.filter(w => w.status === 'success');
+    const updatedRejected = updatedWithdrawals.filter(w => w.status === 'rejected');
+
+    // Update formatted amount with new balance after withdrawal
+    const updatedFormattedAmount = {
+      ...amount._doc,
+      totalBalance: parseFloat(amount.totalBalance).toFixed(2)
+    };
+
+    res.render('withdraw', { 
+      walletAddress: wallet.cryptoWalletAddress,
+      amount: updatedFormattedAmount, 
+      reviewing: updatedReviewing, 
+      success: updatedSuccess, 
+      rejected: updatedRejected, 
+      error: null, 
+      message: 'Withdrawal request submitted successfully.' 
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).render('withdraw', { 
+      walletAddress: wallet?.cryptoWalletAddress || '',
+      amount: { totalBalance: "0.00" },
+      reviewing: [], 
+      success: [], 
+      rejected: [], 
+      error: 'Server error occurred. Please try again later.', 
+      message: null 
+    });
+  }
+});
+
+// GET route - already looks good
+app.get('/link-wallet', checkAuthenticated, async (req, res) => {
+  const message = req.session.message;
+  const error = req.session.error;
+
+  // Clear messages after rendering
+  req.session.message = null;
+  req.session.error = null;
+
+  res.render('linkWallet', { message, error });
+});
+
+// POST route - fixed version
+app.post('/save-wallet', checkAuthenticated, async (req, res) => {
+  try {
+    const username =  req.session.username;
+    
+    if (!username) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'User not authenticated' 
+      });
+    }
+
+    const { name, network, cryptoWallet, cryptoWalletAddress } = req.body;
+
+    // Input validation
+    if (!name || !network || !cryptoWallet || !cryptoWalletAddress) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'All fields are required' 
+      });
+    }
+
+    
+
+    // Check if a wallet record already exists for the user
+    const existingWallet = await Wallet.findOne({ username });
+
+    if (existingWallet) {
+      // Update the existing wallet record with new data
+      await Wallet.findOneAndUpdate(
+        { username },
+        { name, network, cryptoWallet, cryptoWalletAddress, updatedAt: new Date() },
+        { new: true }
+      );
+      
+      return res.json({ 
+        success: true, 
+        message: 'Wallet updated successfully!',
+        redirect: '/link-wallet'
+      });
+    } else {
+      // Create a new wallet record
+      const newWallet = new Wallet({
+        username,
+        name,
+        network,
+        cryptoWallet,
+        cryptoWalletAddress,
+      });
+      await newWallet.save();
+      
+      return res.json({ 
+        success: true, 
+        message: 'Wallet linked successfully!',
+        redirect: '/link-wallet'
+      });
+    }
+
+  } catch (error) {
+    console.error('Wallet save error:', error);
+    return res.status(500).json({ 
+      success: false, 
+      message: 'An error occurred while linking the wallet.' 
+    });
+  }
+});
 
 // Route to display T&C page
 app.get('/terms', async (req, res) => {
