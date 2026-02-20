@@ -1055,11 +1055,38 @@ app.post('/change-withdrawal-password', checkAuthenticated, async (req, res) => 
   }
 });
 
+// Route to display VIP Levels page
+app.get('/vip-levels', checkAuthenticated, async (req, res) => {
+  try {
+    const username = req.session.username; // Assuming you have the username in session
+    const userAmount = await Amount.findOne({ username });
+
+    if (!userAmount) {
+      return res.status(404).send('User not found.');
+    }
+
+    res.render('vip-levels', { userVipLevel: userAmount.vipLevel });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server error');
+  }
+});
+
 
 // Route to display T&C page
 app.get('/terms', async (req, res) => {
   try {
     res.render('t&c');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server error');
+  }
+});
+
+// Route to display T&C page
+app.get('/contact', async (req, res) => {
+  try {
+    res.render('contact');
   } catch (error) {
     console.error(error);
     res.status(500).send('Server error');
@@ -1080,6 +1107,37 @@ app.get('/faq', checkAuthenticated, async (req, res) => {
 app.get('/about', checkAuthenticated, async (req, res) => {
   try {
     res.render('about');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server error');
+  }
+});
+
+// Route to display T&C page
+app.get('/certificates', checkAuthenticated, async (req, res) => {
+  try {
+    res.render('certificate');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server error');
+  }
+});
+
+
+// Route to display T&C page
+app.get('/reset-bonus', checkAuthenticated, async (req, res) => {
+  try {
+    res.render('reset-bonus');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server error');
+  }
+});
+
+// Route to display T&C page
+app.get('/salary', checkAuthenticated, async (req, res) => {
+  try {
+    res.render('salary');
   } catch (error) {
     console.error(error);
     res.status(500).send('Server error');

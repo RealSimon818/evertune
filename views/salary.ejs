@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Salary · Evertune · two charts</title>
+  <link rel="icon" href="images/logo.jpg" type="image/x-icon">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700&family=DM+Sans:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand-coral: #F7594E;
+      --pure-white: #FFFFFF;
+      --deep-black: #1B1B1B;
+      --cream-peach: #FFF9F6;
+      --teal-turquoise: #69D7DE;
+      --warm-beige: #F9DCB7;
+      --off-white: #FDFEFE;
+      --gray-medium: #6C757D;
+      --card-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    }
+    * { font-family: 'Manrope', sans-serif; color: var(--deep-black); box-sizing: border-box; }
+    body {
+      background: linear-gradient(135deg, var(--cream-peach) 0%, var(--warm-beige) 50%, var(--teal-turquoise) 100%);
+      background-size: 200% 200%;
+      animation: gradientShift 15s ease infinite;
+      min-height: 100vh;
+      margin: 0;
+      padding-top: 80px;
+      padding-bottom: 50px;
+    }
+    @keyframes gradientShift {
+      0%   { background-position: 0%   50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0%   50%; }
+    }
+
+    /* ===== navbar (unchanged) ===== */
+    .navbar {
+      background: var(--pure-white);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 15px 0; position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1030; height: 70px;
+    }
+    .navbar-container {
+      width: 100%; max-width: 1200px;
+      margin: 0 auto; padding: 0 15px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .navbar-left  { display: flex; align-items: center; flex: 1; }
+    .navbar-right { display: flex; align-items: center; justify-content: flex-end; flex: 1; gap: 15px; }
+    .evertune-logo { width: 136px; height: 32px; display: block; }
+    .btn-nav-primary {
+      background-color: var(--brand-coral); border: none; border-radius: 50px;
+      padding: 10px 24px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+      color: white; text-decoration: none; transition: all 0.3s ease;
+    }
+    .btn-nav-primary:hover {
+      background-color: #e04a40; transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(247,89,78,0.3); color: white;
+    }
+    .hamburger-menu {
+      background: none; border: none; font-size: 1.8rem;
+      color: var(--deep-black); padding: 5px 10px;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+
+    /* ===== profile overlay & modal (unchanged) ===== */
+    .profile-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      background-color: rgba(0,0,0,0.3); z-index: 1031; display: none;
+    }
+    .profile-overlay.show { display: block; }
+    .profile-modal {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; align-items: flex-start; justify-content: center;
+      z-index: 1032; visibility: hidden; opacity: 0;
+      transition: visibility 0.3s, opacity 0.3s;
+      padding-top: 70px; overflow-y: auto;
+    }
+    .profile-modal.show { visibility: visible; opacity: 1; }
+    .profile-modal-content {
+      background: var(--pure-white); border-radius: 0 0 20px 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      width: 100%; max-width: 900px; max-height: calc(100vh - 70px);
+      overflow-y: auto; transform: translateY(-100%);
+      transition: transform 0.4s ease;
+    }
+    .profile-modal.show .profile-modal-content { transform: translateY(0); }
+    .profile-modal-header {
+      padding: 22px 28px;
+      background: linear-gradient(135deg, var(--cream-peach) 0%, var(--warm-beige) 100%);
+      border-radius: 0 0 20px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 10;
+    }
+    .profile-modal-header .evertune-logo { width: 140px; height: 33px; }
+    .profile-modal-close {
+      background: none; border: none; font-size: 1.9rem; color: var(--deep-black);
+      cursor: pointer; width: 40px; height: 40px; display: flex;
+      align-items: center; justify-content: center;
+      border-radius: 50%; transition: all 0.3s ease; flex-shrink: 0;
+    }
+    .profile-modal-close:hover { background-color: rgba(27,27,27,0.1); transform: rotate(90deg); }
+    .profile-modal-body { padding: 28px; }
+    .user-info-grid {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 16px; margin-bottom: 28px; padding-bottom: 28px;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    .info-card {
+      background: linear-gradient(135deg, var(--cream-peach) 0%, var(--off-white) 100%);
+      border-radius: 12px; padding: 18px 14px;
+      text-align: center; box-shadow: var(--card-shadow);
+    }
+    .info-label { font-size: 0.85rem; color: var(--gray-medium); margin-bottom: 7px; line-height: 1.3; }
+    .info-value { font-size: 1.2rem; font-weight: 700; color: var(--deep-black); word-break: break-all; }
+    .profile-links-section { margin-bottom: 20px; }
+    .profile-section-title {
+      font-size: 1.2rem; font-weight: 600; color: var(--brand-coral);
+      margin-bottom: 18px; padding-left: 10px;
+      border-left: 4px solid var(--brand-coral);
+      cursor: pointer; display: flex; align-items: center; gap: 10px;
+      transition: color 0.3s ease;
+    }
+    .profile-section-title:hover { color: #e04a40; }
+    .profile-section-title i { font-size: 1rem; transition: transform 0.3s ease; }
+    .profile-section-title.active i { transform: rotate(180deg); }
+    .profile-links-grid {
+      display: grid; grid-template-columns: repeat(4,1fr);
+      gap: 14px; max-height: 0; overflow: hidden;
+      transition: max-height 0.5s ease;
+    }
+    .profile-links-grid.show { max-height: 600px; }
+    .profile-link-item {
+      background: var(--off-white); border: 1px solid rgba(0,0,0,0.05);
+      border-radius: 10px; padding: 10px; text-align: center;
+      text-decoration: none; color: var(--deep-black); font-weight: 500;
+      font-size: 0.85rem; transition: all 0.3s ease;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .profile-link-item i { font-size: 1.4rem; color: var(--brand-coral); }
+    .profile-link-item:hover {
+      background: var(--brand-coral); color: var(--pure-white);
+      transform: translateY(-4px); box-shadow: 0 8px 18px rgba(247,89,78,0.3);
+    }
+    .profile-link-item:hover i { color: var(--pure-white); }
+    .profile-link-item.logout { background: rgba(247,89,78,0.1); border-color: var(--brand-coral); }
+    .profile-link-item.logout:hover { background: var(--brand-coral); }
+
+    /* ===== page content ===== */
+    .page-container { max-width: 680px; width: 90%; margin: 2rem auto; }
+
+    /* page header */
+    .page-header { text-align: center; margin-bottom: 2rem; }
+    .page-header h1 {
+      font-family: 'Montserrat', sans-serif; font-weight: 800;
+      font-size: 2.2rem; color: var(--deep-black); margin-bottom: 8px;
+    }
+    .page-header p { color: var(--gray-medium); font-size: 0.95rem; margin: 0; }
+
+    /* hero icon */
+    .hero-icon-wrap {
+      width: 90px; height: 90px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--brand-coral) 0%, #ff8a65 100%);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.2rem;
+      box-shadow: 0 12px 30px rgba(247,89,78,0.35);
+      animation: pulse 3s ease-in-out infinite;
+    }
+    .hero-icon-wrap i { font-size: 2.4rem; color: white; }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1);    box-shadow: 0 12px 30px rgba(247,89,78,0.35); }
+      50%       { transform: scale(1.06); box-shadow: 0 16px 40px rgba(247,89,78,0.5); }
+    }
+
+    /* ===== chart cards (stacked, no certificate styling) ===== */
+    .chart-card {
+      background: white;
+      border-radius: 28px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.5);
+      margin-bottom: 28px;  /* vertical stacking */
+      transition: transform 0.2s ease;
+    }
+    .chart-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 28px 50px rgba(247,89,78,0.15);
+    }
+
+    /* header – salary style */
+    .chart-header {
+      background: linear-gradient(145deg, var(--deep-black) 0%, #2a2a2a 100%);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .chart-header i {
+      font-size: 1.8rem;
+      color: var(--teal-turquoise);
+      background: rgba(105,215,222,0.15);
+      border-radius: 14px;
+      padding: 8px;
+    }
+    .chart-header-text { flex: 1; }
+    .chart-header-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: white;
+      margin: 0;
+      letter-spacing: 0.3px;
+    }
+    .chart-header-sub {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.7);
+      margin: 4px 0 0;
+    }
+    .chart-badge {
+      background: var(--brand-coral);
+      border-radius: 40px;
+      padding: 6px 16px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    /* chart image area */
+    .chart-image-wrap {
+      padding: 24px 24px 16px;
+      background: linear-gradient(145deg, #fafafa 0%, #ffffff 100%);
+      position: relative;
+      text-align: center;
+    }
+    .chart-image-wrap img {
+      width: 100%;
+      max-width: 560px;
+      margin: 0 auto;
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      display: block;
+      cursor: zoom-in;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .chart-image-wrap img:hover {
+      transform: scale(1.01);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+    }
+
+    /* zoom hint */
+    .zoom-hint-chart {
+      position: absolute; bottom: 28px; right: 36px;
+      background: rgba(27,27,27,0.7); backdrop-filter: blur(4px);
+      color: white; font-size: 0.7rem; font-weight: 600;
+      padding: 5px 14px; border-radius: 50px;
+      display: flex; align-items: center; gap: 5px;
+      pointer-events: none;
+      opacity: 1; transition: opacity 0.3s ease;
+    }
+    .chart-image-wrap:hover .zoom-hint-chart { opacity: 0; }
+
+    /* chart footer */
+    .chart-footer {
+      padding: 12px 24px 20px;
+      border-top: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: white;
+    }
+    .chart-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.85rem;
+      color: var(--gray-medium);
+    }
+    .chart-meta i { color: var(--brand-coral); font-size: 1rem; }
+    .download-btn {
+      background: var(--brand-coral);
+      border: none;
+      border-radius: 60px;
+      color: white;
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 10px 22px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 6px 14px rgba(247,89,78,0.35);
+    }
+    .download-btn:hover {
+      background: #e04a40;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px rgba(247,89,78,0.45);
+      color: white;
+    }
+
+    /* lightbox (dynamic) */
+    .lightbox {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.88); backdrop-filter: blur(6px);
+      z-index: 9999; display: none;
+      align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .lightbox.show { display: flex; }
+    .lightbox img {
+      max-width: 92vw; max-height: 88vh;
+      border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      object-fit: contain;
+    }
+    .lightbox-close {
+      position: fixed; top: 20px; right: 22px;
+      background: rgba(255,255,255,0.15); border: none;
+      color: white; font-size: 2rem; width: 48px; height: 48px;
+      border-radius: 50%; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s ease;
+    }
+    .lightbox-close:hover { background: rgba(255,255,255,0.28); }
+
+    .footer-note { text-align: center; opacity: 0.7; font-size: 0.85rem; margin-top: 1.5rem; }
+
+    /* responsive */
+    @media (max-width: 768px) {
+      .navbar { height: 60px; padding: 10px 0; }
+      body { padding-top: 60px; }
+      .profile-modal { padding-top: 60px; }
+      .profile-modal-content { max-width: 100%; border-radius: 0 0 16px 16px; max-height: calc(100vh - 60px); }
+      .profile-modal-header { padding: 14px 18px; }
+      .profile-modal-header .evertune-logo { width: 110px; height: 26px; }
+      .profile-modal-body { padding: 18px; }
+      .user-info-grid { grid-template-columns: repeat(2,1fr); gap: 12px; margin-bottom: 20px; padding-bottom: 20px; }
+      .info-card { padding: 14px 10px; }
+      .info-value { font-size: 1rem; }
+      .profile-links-grid { grid-template-columns: repeat(3,1fr); gap: 10px; }
+      .page-header h1 { font-size: 1.8rem; }
+      .chart-footer { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .download-btn { width: 100%; justify-content: center; }
+      .zoom-hint-chart { bottom: 24px; right: 24px; }
+    }
+    @media (max-width: 576px) {
+      .profile-modal-body { padding: 14px; }
+      .profile-modal-header { padding: 12px 14px; }
+      .profile-modal-header .evertune-logo { width: 95px; height: 22px; }
+      .user-info-grid { grid-template-columns: repeat(2,1fr); gap: 10px; }
+      .info-card { padding: 12px 8px; }
+      .profile-links-grid { grid-template-columns: repeat(2,1fr); gap: 10px; }
+      .chart-header { padding: 16px 18px; }
+      .chart-badge { padding: 4px 12px; font-size: 0.7rem; }
+      .zoom-hint-chart { display: none; } /* hide on very small */
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========== TOP NAVBAR ========== -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <div class="navbar-left">
+        <svg class="evertune-logo" viewBox="0 0 136 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- paths (same as original, kept for brevity) -->
+          <path d="M0.132268 29.32C-0.16107 28.0008 0.0842353 26.7314 0.375858 25.51C0.864755 23.2148 1.69502 21.0173 2.47554 18.8182L3.11025 17.0598C2.71913 16.9621 2.32801 16.914 1.98664 16.7665C1.25416 16.3754 1.20441 15.4473 1.93861 15.0082C2.47554 14.7149 3.06222 14.5193 3.64718 14.3237C4.08633 14.1779 4.37967 13.9824 4.57523 13.5415L7.50518 7.1927C7.60296 7.04689 7.65099 6.85134 7.45714 6.70381C7.35936 6.65578 7.11578 6.60603 6.96825 6.65578C5.89439 7.0469 4.67301 7.14467 3.69521 7.87716C3.5494 7.97494 3.25606 8.02297 3.01076 8.02297C2.52186 8.02297 2.18049 7.77938 1.98493 7.38826C1.83912 6.99715 1.9369 6.50997 2.22852 6.16688C2.71742 5.67798 3.35213 5.43439 3.98683 5.23883C5.35403 4.79968 6.6732 4.36053 8.04039 4.01745C8.62707 3.87164 9.11425 3.72411 9.35956 3.13915C9.65289 2.50444 10.1898 2.30888 10.7268 2.60222C11.7028 3.09112 12.5828 2.84581 13.5589 2.60222L23.1808 0.159447C23.5221 0.0616675 23.8652 -0.0841399 24.2546 0.0616715C24.6457 0.25723 25.0849 0.452788 25.1329 0.93997C25.1809 1.42715 24.7915 1.67246 24.3507 1.81827C23.7160 2.06186 23.1293 2.30716 22.4466 2.50272C19.3210 3.33299 16.1955 4.16326 13.0683 5.04327L11.9945 5.33661C11.6531 5.43439 11.3597 5.67798 11.2122 6.02107L8.38004 12.713C9.01475 12.9565 9.40587 12.761 9.84502 12.6649C12.1403 12.0782 14.4853 11.5413 16.7805 10.9564C17.4152 10.7608 18.0019 10.8105 18.5388 11.1519C18.9780 11.4933 18.978 12.08 18.5388 12.4213C18.1477 12.6649 17.7566 12.7627 17.3174 12.8605C14.3875 13.6907 11.4558 14.5708 8.47783 15.3032C7.50175 15.5468 6.86532 15.9877 6.52395 16.9638C5.35232 20.2849 4.08118 23.5081 3.34869 26.927C3.20288 27.5617 3.10511 28.1484 3.20288 28.7831C3.25092 29.1742 3.49622 29.4178 3.93537 29.4178C4.86342 29.4178 5.74172 29.1245 6.66976 28.8809C9.25834 28.1964 11.7491 27.2203 14.0941 25.8034C14.7288 25.4123 15.3636 25.1189 16.1938 25.3145C16.5352 25.4123 16.8783 25.6078 17.0241 25.9492C17.2196 26.4381 16.9761 26.7795 16.6330 27.1208C16.4374 27.3164 16.1441 27.4622 15.9005 27.6578C12.8230 29.7574 9.40416 31.1246 5.78975 31.8588C4.95948 32.0544 4.08118 32.0047 3.20117 31.9566C1.54063 31.8588 0.514808 30.9805 0.12369 29.32H0.132268Z" fill="#F7594E"/>
+          <!-- remaining svg paths ... (shortened for demo) -->
+        </svg>
+      </div>
+      <div class="navbar-right">
+        <a href="/start-page" class="btn-nav-primary">Start Work</a>
+        <button class="hamburger-menu" id="profileMenuToggle">
+          <i class="bi bi-list"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Blur Overlay + Profile Modal (identical to original, no changes needed) -->
+  <div class="profile-overlay" id="profileOverlay"></div>
+  <div class="profile-modal" id="profileModal">
+    <div class="profile-modal-content">
+      <div class="profile-modal-header">
+        <svg class="evertune-logo" viewBox="0 0 136 32" fill="none" xmlns="http://www.w3.org/2000/svg">...</svg>
+        <button class="profile-modal-close" id="closeProfileModal"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="profile-modal-body">
+        <div class="user-info-grid">
+          <div class="info-card"><div class="info-label">Username</div><div class="info-value" id="user-username">Loading...</div></div>
+          <div class="info-card"><div class="info-label">Wallet Balance</div><div class="info-value" id="user-wallet">0.00 USD</div></div>
+          <div class="info-card"><div class="info-label">VIP Level</div><div class="info-value" id="user-vip">VIP1</div></div>
+          <div class="info-card"><div class="info-label">Invitation Code</div><div class="info-value" id="user-invitation-code">Loading...</div></div>
+          <div class="info-card"><div class="info-label">Today's Commission</div><div class="info-value" id="user-commission">0.00 USD</div></div>
+          <div class="info-card"><div class="info-label">Today's Reward</div><div class="info-value" id="user-reward">0.00 USD</div></div>
+        </div>
+        <div class="profile-links-section">
+          <div class="profile-section-title" id="profileLinksToggle"><span>Profile</span><i class="bi bi-chevron-down"></i></div>
+          <div class="profile-links-grid" id="profileLinksGrid">
+            <a href="/change-password" class="profile-link-item"><i class="bi bi-clock-history"></i><span>Deposit History</span></a>
+            <a href="/link-wallet" class="profile-link-item"><i class="bi bi-wallet2"></i><span>My Wallet</span></a>
+            <a href="/withdraw" class="profile-link-item"><i class="bi bi-cash-stack"></i><span>Withdraw</span></a>
+            <a href="/change-withdrawal-password" class="profile-link-item"><i class="bi bi-shield-lock"></i><span>Change Withdrawal Password</span></a>
+            <a href="/vip-levels" class="profile-link-item"><i class="bi bi-star"></i><span>VIP Level</span></a>
+            <a href="/salary" class="profile-link-item"><i class="bi bi-currency-dollar"></i><span>Salary</span></a>
+            <a href="/certificates" class="profile-link-item"><i class="bi bi-patch-check"></i><span>Certificates</span></a>
+            <a href="/faq" class="profile-link-item"><i class="bi bi-question-circle"></i><span>FAQs</span></a>
+            <a href="/terms" class="profile-link-item"><i class="bi bi-file-text"></i><span>T & C</span></a>
+            <a href="/reset-bonus" class="profile-link-item"><i class="bi bi-arrow-repeat"></i><span>Reset Bonus</span></a>
+            <a href="/contact" class="profile-link-item"><i class="bi bi-envelope"></i><span>Contact</span></a>
+            <a href="#" onclick="logout()" class="profile-link-item logout"><i class="bi bi-box-arrow-right"></i><span>Logout</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MAIN CONTENT: TWO STACKED SALARY CHARTS ========== -->
+  <div class="page-container">
+    <div class="page-header">
+      <div class="hero-icon-wrap"><i class="bi bi-bar-chart-fill"></i></div>
+      <h1>Salary charts</h1>
+      <p>Monthly breakdown · two periods (placeholders)</p>
+    </div>
+
+    <!-- CHART 1 -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <i class="bi bi-calendar2-week-fill"></i>
+        <div class="chart-header-text">
+          <p class="chart-header-title">Current month · salary projection</p>
+          <p class="chart-header-sub">Based on completed tasks & bonuses</p>
+        </div>
+        <div class="chart-badge"><i class="bi bi-graph-up-arrow"></i> +12.4%</div>
+      </div>
+      <div class="chart-image-wrap">
+        <img src="/images/bonus.png" alt="salary chart 1" onclick="openLightboxWithSrc('/images/bonus.png')">
+        <div class="zoom-hint-chart"><i class="bi bi-zoom-in"></i> enlarge</div>
+      </div>
+      <div class="chart-footer">
+        <div class="chart-meta">
+          <i class="bi bi-pie-chart-fill"></i> est. $2,450
+          <i class="bi bi-calendar-check ms-2"></i> Mar 2025
+        </div>
+        <a href="#" class="download-btn" onclick="alert('download chart 1 (PNG)')"><i class="bi bi-download"></i> Save</a>
+      </div>
+    </div>
+
+    <!-- CHART 2 (stacked below) -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <i class="bi bi-calendar2-range-fill"></i>
+        <div class="chart-header-text">
+          <p class="chart-header-title">Previous month · final earnings</p>
+          <p class="chart-header-sub">Including overtime & adjustments</p>
+        </div>
+        <div class="chart-badge"><i class="bi bi-check-circle"></i> paid</div>
+      </div>
+      <div class="chart-image-wrap">
+        <img src="/images/bonus.png" alt="salary chart 2" onclick="openLightboxWithSrc('/images/bonus.png')">
+        <div class="zoom-hint-chart"><i class="bi bi-zoom-in"></i> enlarge</div>
+      </div>
+      <div class="chart-footer">
+        <div class="chart-meta">
+          <i class="bi bi-currency-dollar"></i> $2,830.50
+          <i class="bi bi-calendar-check ms-2"></i> Feb 2025
+        </div>
+        <a href="#" class="download-btn" onclick="alert('download chart 2 (PNG)')"><i class="bi bi-download"></i> Save</a>
+      </div>
+    </div>
+
+    <!-- optional note: no certificate references, just two salary images -->
+    <p style="text-align:center; opacity:0.5; font-size:0.8rem; margin-top:-0.5rem;">* charts are placeholders (bonus.png)</p>
+  </div>
+
+  <div class="footer-note">© Evertune. All Rights Reserved.</div>
+
+  <!-- LIGHTBOX (dynamic) -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <button class="lightbox-close" onclick="closeLightbox()"><i class="bi bi-x-lg"></i></button>
+    <img id="lightboxImg" src="/images/bonus.png" alt="full size chart">
+  </div>
+
+  <script>
+    // ===== LIGHTBOX =====
+    function openLightboxWithSrc(src) {
+      document.getElementById('lightboxImg').src = src;
+      document.getElementById('lightbox').classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('show');
+      document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+    // ===== PROFILE MODAL (identical to original) =====
+    function initProfileModal() {
+      const toggle = document.getElementById('profileMenuToggle');
+      const closeBtn = document.getElementById('closeProfileModal');
+      const modal = document.getElementById('profileModal');
+      const overlay = document.getElementById('profileOverlay');
+      const linksToggle = document.getElementById('profileLinksToggle');
+      const linksGrid = document.getElementById('profileLinksGrid');
+
+      toggle.addEventListener('click', e => {
+        e.stopPropagation();
+        modal.classList.add('show');
+        overlay.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => { linksGrid.classList.add('show'); linksToggle.classList.add('active'); }, 300);
+      });
+      closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', closeModal);
+      linksToggle.addEventListener('click', () => {
+        linksToggle.classList.toggle('active');
+        linksGrid.classList.toggle('show');
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
+      });
+    }
+    function closeModal() {
+      document.getElementById('profileModal').classList.remove('show');
+      document.getElementById('profileOverlay').classList.remove('show');
+      document.body.style.overflow = '';
+      document.getElementById('profileLinksGrid').classList.remove('show');
+      document.getElementById('profileLinksToggle').classList.remove('active');
+    }
+
+    // user data (same fallback)
+    async function fetchUserData() {
+      try {
+        const response = await fetch('/api/user/complete-profile');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const result = await response.json();
+        if (result.success) updateUserUI(result.data);
+        else throw new Error(result.error || 'Failed');
+      } catch (error) { useFallbackData(); }
+    }
+    function updateUserUI(data) {
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      set('user-username',        data.username       || 'User');
+      set('user-wallet',          `${parseFloat(data.totalBalance  || 0).toFixed(2)} USD`);
+      set('user-vip',             data.vipLevel       || 'VIP1');
+      set('user-invitation-code', data.invitationCode || 'N/A');
+      set('user-commission',      `${parseFloat(data.todaysProfit  || 0).toFixed(2)} USD`);
+      set('user-reward',          `${parseFloat(data.todaysProfit  || 0).toFixed(2)} USD`);
+    }
+    function useFallbackData() {
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      set('user-username','User'); set('user-wallet','0.00 USD');
+      set('user-vip','VIP1');      set('user-invitation-code','N/A');
+      set('user-commission','0.00 USD'); set('user-reward','0.00 USD');
+    }
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        fetch('/api/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+          .then(r => r.json())
+          .then(data => { if (data.success) window.location.href = '/?auth=login&message=' + encodeURIComponent('Logged out successfully'); })
+          .catch(() => alert('Logout failed.'));
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initProfileModal();
+      fetchUserData();
+    });
+  </script>
+</body>
+</html>
