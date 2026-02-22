@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Edit Deposit</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+    }
+    .dashboard-container {
+      max-width: 500px;
+      margin: 5% auto;
+      background-color: #ffffff;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .dashboard-title {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #F7594E;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .form-label {
+      font-weight: 500;
+      color: #495057;
+    }
+    .btn-custom {
+      width: 100%;
+      font-weight: bold;
+      border: none;
+    }
+    .btn-danger-custom {
+      background-color: #dc3545;
+      color: white;
+    }
+    .btn-danger-custom:hover {
+      background-color: #c82333;
+    }
+    .back-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .back-link a {
+      color: #F7594E;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+    .alert {
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .alert-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .alert-warning {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+    }
+    .input-group-custom {
+      position: relative;
+    }
+    .input-group-custom i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #adb5bd;
+      z-index: 10;
+    }
+    .input-group-custom input,
+    .input-group-custom select {
+      padding-left: 40px;
+    }
+    .input-group-custom input:read-only {
+      background-color: #e9ecef;
+      cursor: not-allowed;
+    }
+    .info-box {
+      background-color: #e7f3ff;
+      border: 1px solid #b8daff;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 25px;
+    }
+    .info-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #004085;
+      margin-bottom: 15px;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px dashed #9bc5ff;
+    }
+    .info-row:last-child {
+      border-bottom: none;
+    }
+    .info-label {
+      color: #004085;
+      font-weight: 500;
+      opacity: 0.9;
+    }
+    .info-value {
+      font-weight: 600;
+      color: #002752;
+    }
+    .nav-links {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid #e9ecef;
+    }
+    .nav-link-custom {
+      color: #6c757d;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-link-custom:hover {
+      color: #F7594E;
+    }
+    .nav-link-custom i {
+      margin-right: 5px;
+    }
+    .delete-section {
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 2px solid #e9ecef;
+    }
+    .readonly-hint {
+      font-size: 0.85rem;
+      color: #6c757d;
+      margin-top: 5px;
+      margin-left: 5px;
+    }
+    .text-small {
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-container">
+    <div class="dashboard-title">
+      <i class="bi bi-pencil-square"></i> Edit Deposit
+    </div>
+
+    <% if (message) { %>
+      <div class="alert alert-success">
+        <i class="bi bi-check-circle-fill me-2"></i> <%= message %>
+      </div>
+    <% } %>
+    
+    <% if (error) { %>
+      <div class="alert alert-error">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> <%= error %>
+      </div>
+    <% } %>
+
+    <!-- Deposit Info Box -->
+    <div class="info-box">
+      <div class="info-title">
+        <i class="bi bi-info-circle me-2"></i> Deposit Information
+      </div>
+      <div class="info-row">
+        <span class="info-label">Transaction ID:</span>
+        <span class="info-value"><%= history.transactionId %></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Created:</span>
+        <span class="info-value"><%= new Date(history.createdAt).toLocaleString() %></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Last Updated:</span>
+        <span class="info-value"><%= new Date(history.updatedAt).toLocaleString() %></span>
+      </div>
+    </div>
+
+    <!-- Edit Deposit Form -->
+    <form action="/admin/edit-history/<%= history._id %>" method="POST" id="editForm">
+      <!-- Hidden type field set to deposit -->
+      <input type="hidden" name="type" value="deposit">
+
+      <div class="mb-3 input-group-custom">
+        <label for="username" class="form-label">
+          <i class="bi bi-person"></i> Username
+        </label>
+        <i class="bi bi-person"></i>
+        <input type="text" id="username" name="username" class="form-control" 
+               value="<%= history.username %>" readonly>
+        <div class="readonly-hint">
+          <i class="bi bi-lock me-1"></i> Username cannot be changed
+        </div>
+      </div>
+
+      <div class="mb-3 input-group-custom">
+        <label for="amount" class="form-label">
+          <i class="bi bi-currency-dollar"></i> Amount (USDC) <span class="text-danger">*</span>
+        </label>
+        <i class="bi bi-currency-dollar"></i>
+        <input type="number" id="amount" name="amount" class="form-control" 
+               value="<%= history.amount %>" 
+               step="0.01" min="1" placeholder="Enter deposit amount" required>
+      </div>
+
+      <div class="mb-4 input-group-custom">
+        <label for="status" class="form-label">
+          <i class="bi bi-flag"></i> Status <span class="text-danger">*</span>
+        </label>
+        <i class="bi bi-flag"></i>
+        <select class="form-control" id="status" name="status" required>
+          <option value="reviewing" <%= history.status === 'reviewing' ? 'selected' : '' %>>Reviewing</option>
+          <option value="success" <%= history.status === 'success' ? 'selected' : '' %>>Success</option>
+          <option value="rejected" <%= history.status === 'rejected' ? 'selected' : '' %>>Rejected</option>
+        </select>
+      </div>
+      
+      <button type="submit" class="btn btn-custom btn-danger text-light mb-3" id="submitBtn">
+        <span id="submitText"><i class="bi bi-save me-2"></i> Update Deposit</span>
+        <span id="submitSpinner" class="spinner-border spinner-border-sm" style="display:none;"></span>
+      </button>
+    </form>
+
+    <!-- Delete Section -->
+    <div class="delete-section">
+      <form action="/admin/delete-history/<%= history._id %>" method="POST" id="deleteForm" onsubmit="return confirmDelete()">
+        <button type="submit" class="btn btn-custom btn-danger-custom" id="deleteBtn">
+          <span id="deleteText"><i class="bi bi-trash me-2"></i> Delete Deposit</span>
+          <span id="deleteSpinner" class="spinner-border spinner-border-sm" style="display:none;"></span>
+        </button>
+      </form>
+    </div>
+
+    <div class="nav-links">
+      <a href="/admin/history" class="nav-link-custom">
+        <i class="bi bi-arrow-left"></i> Back to Deposits
+      </a>
+      <a href="/admin/add-history" class="nav-link-custom">
+        <i class="bi bi-plus-circle"></i> Add New
+      </a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Edit form submission spinner
+    document.getElementById('editForm').addEventListener('submit', function() {
+      const btn = document.getElementById('submitBtn');
+      const txt = document.getElementById('submitText');
+      const spn = document.getElementById('submitSpinner');
+      btn.disabled = true;
+      txt.style.display = 'none';
+      spn.style.display = 'inline-block';
+    });
+
+    // Delete form submission spinner
+    document.getElementById('deleteForm').addEventListener('submit', function() {
+      const btn = document.getElementById('deleteBtn');
+      const txt = document.getElementById('deleteText');
+      const spn = document.getElementById('deleteSpinner');
+      btn.disabled = true;
+      txt.style.display = 'none';
+      spn.style.display = 'inline-block';
+    });
+
+    // Confirm delete
+    function confirmDelete() {
+      return confirm('Are you sure you want to delete this deposit record? This action cannot be undone.');
+    }
+
+    // Handle flash messages auto-dismiss
+    setTimeout(() => {
+      const alerts = document.querySelectorAll('.alert');
+      alerts.forEach(alert => {
+        alert.style.transition = 'opacity 0.5s';
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 500);
+      });
+    }, 5000);
+
+    // Add confirmation for status change to success
+    document.getElementById('status').addEventListener('change', function(e) {
+      if (e.target.value === 'success') {
+        const amount = document.getElementById('amount').value;
+        const currentStatus = '<%= history.status %>';
+        
+        if (currentStatus !== 'success') {
+          if (!confirm(`Are you sure you want to change status to SUCCESS? This will add $${amount} to the user's balance.`)) {
+            e.target.value = currentStatus;
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

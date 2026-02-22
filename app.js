@@ -1154,6 +1154,11 @@ app.use('/',require('./routes/regislo'));
 app.use('/',require('./routes/admin'));
 app.use('/',require('./routes/balance'));
 
+const depositRoutes = require('./routes/depositRoutes');
+
+// Add this with your other route middleware
+app.use('/', depositRoutes);
+
 // Logout API
 app.post('/api/logout', (req, res) => {
     req.session.destroy(err => {

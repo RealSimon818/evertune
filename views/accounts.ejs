@@ -1,51 +1,410 @@
-<!-- views/accounts.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Frozen Accounts</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Add History · Evertune</title>
+  <link rel="icon" href="images/logo.jpg" type="image/x-icon">
+  <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .admin-container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .admin-card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    .admin-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+    .admin-header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .admin-header p {
+      opacity: 0.9;
+      font-size: 0.95rem;
+    }
+    .admin-body {
+      padding: 2rem;
+    }
+    .form-label {
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    .form-control, .form-select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      outline: none;
+    }
+    .btn-submit {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+    .btn-submit:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .alert {
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+    }
+    .alert-success {
+      background: #c6f6d5;
+      color: #22543d;
+      border: 1px solid #9ae6b4;
+    }
+    .alert-error {
+      background: #fed7d7;
+      color: #742a2a;
+      border: 1px solid #fc8181;
+    }
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .search-section {
+      margin-bottom: 2rem;
+    }
+    .user-search {
+      display: flex;
+      gap: 1rem;
+    }
+    .user-search .form-control {
+      flex: 1;
+    }
+    .user-search .btn-search {
+      background: #4a5568;
+      color: white;
+      border: none;
+      padding: 0 2rem;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .user-search .btn-search:hover {
+      background: #2d3748;
+    }
+    .user-info-display {
+      background: #ebf8ff;
+      border: 2px solid #90cdf4;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-top: 1rem;
+      display: none;
+    }
+    .user-info-display.show {
+      display: block;
+    }
+    .user-info-display p {
+      margin: 0;
+      color: #2c5282;
+      font-weight: 500;
+    }
+    .user-info-display i {
+      margin-right: 0.5rem;
+      color: #4299e1;
+    }
+    .nav-links {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .nav-link {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      transition: all 0.3s ease;
+    }
+    .nav-link:hover {
+      background: #f7fafc;
+      color: #764ba2;
+    }
+    .type-badge {
+      display: inline-block;
+      padding: 0.25rem 1rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+    .type-badge.deposit {
+      background: #c6f6d5;
+      color: #22543d;
+    }
+    .type-badge.withdrawal {
+      background: #fed7d7;
+      color: #742a2a;
+    }
+  </style>
 </head>
 <body>
-  <div class="container mt-5">
-    <h2 class="mb-4 text-center">Frozen Accounts </h2>
-
-    <table class="table table-bordered table-striped">
-      <thead class="table-dark">
-        <tr>
-          <th>Username</th>
-         
-          <th>Total Balance</th>
-          <th>Freezing Point</th>
-          <th>Latest Optimization Count</th>
-          <th>VIP Level</th>
-          <th>Daily Limit</th>
-          <th>Today's Profit</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% if (accounts.length > 0) { %>
-          <% accounts.forEach(account => { %>
-            <tr>
-              <td><%= account.username %></td>
-
-              <td><%= account.totalBalance %></td>
-              <td><%= account.freezingPoint %></td>
-              <td><%= account.latestOptimizationCount %></td>
-              <td><%= account.vipLevel %></td>
-              <td><%= account.dailyLimit %></td>
-              <td><%= account.todaysProfit %></td>
-            </tr>
-          <% }) %>
-        <% } else { %>
-          <tr>
-            <td colspan="8" class="text-center">No accounts meet the criteria.</td>
-          </tr>
+  <div class="admin-container">
+    <div class="admin-card">
+      <div class="admin-header">
+        <h1><i class="bi bi-plus-circle"></i> Add History</h1>
+        <p>Add deposit or withdrawal record for user</p>
+      </div>
+      
+      <div class="admin-body">
+        <% if (message) { %>
+          <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill"></i> <%= message %>
+          </div>
         <% } %>
-      </tbody>
-    </table>
+        
+        <% if (error) { %>
+          <div class="alert alert-error">
+            <i class="bi bi-exclamation-triangle-fill"></i> <%= error %>
+          </div>
+        <% } %>
+
+        <!-- Search User Section -->
+        <div class="search-section">
+          <label class="form-label"><i class="bi bi-search"></i> Find User</label>
+          <div class="user-search">
+            <input type="text" class="form-control" id="searchUsername" placeholder="Enter username..." value="<%= searchedUsername || '' %>">
+            <button class="btn-search" onclick="searchUser()">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
+          <div class="user-info-display" id="userInfoDisplay">
+            <p><i class="bi bi-person-check-fill"></i> User found: <span id="foundUsername"></span></p>
+          </div>
+        </div>
+
+        <!-- Add History Form -->
+        <form action="/admin/add-history" method="POST" id="historyForm">
+          <div class="mb-3">
+            <label class="form-label" for="username">
+              <i class="bi bi-person"></i> Username <span class="text-danger">*</span>
+            </label>
+            <input type="text" class="form-control" id="username" name="username" 
+                   value="<%= formData?.username || searchedUsername || '' %>" 
+                   placeholder="Enter username" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="type">
+              <i class="bi bi-arrow-left-right"></i> Transaction Type <span class="text-danger">*</span>
+            </label>
+            <select class="form-select" id="type" name="type" required onchange="updateTypeUI()">
+              <option value="deposit" <%= formData?.type === 'deposit' ? 'selected' : '' %>>Deposit</option>
+              <option value="withdrawal" <%= formData?.type === 'withdrawal' ? 'selected' : '' %>>Withdrawal</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="amount">
+              <i class="bi bi-currency-dollar"></i> Amount (USDC) <span class="text-danger">*</span>
+            </label>
+            <input type="number" class="form-control" id="amount" name="amount" 
+                   value="<%= formData?.amount || '' %>" 
+                   step="0.01" min="1" placeholder="Enter amount" required>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label" for="status">
+              <i class="bi bi-flag"></i> Status <span class="text-danger">*</span>
+            </label>
+            <select class="form-select" id="status" name="status" required>
+              <option value="reviewing" <%= formData?.status === 'reviewing' ? 'selected' : '' %>>Reviewing</option>
+              <option value="success" <%= formData?.status === 'success' ? 'selected' : '' %>>Success</option>
+              <option value="rejected" <%= formData?.status === 'rejected' ? 'selected' : '' %>>Rejected</option>
+            </select>
+          </div>
+
+          <div class="mb-4 p-3 bg-gray-50 rounded-lg" id="typeInfo">
+            <div class="flex items-center">
+              <i class="bi bi-info-circle text-blue-500 mr-2"></i>
+              <span id="typeInfoText">Deposit will add to user's balance when marked as success</span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit" id="submitBtn">
+            <span id="submitText"><i class="bi bi-save"></i> Add History Record</span>
+            <span id="submitSpinner" class="spinner" style="display:none;"></span>
+          </button>
+        </form>
+
+        <div class="nav-links">
+          <a href="/admin/history" class="nav-link"><i class="bi bi-list-ul"></i> View All History</a>
+          <a href="/admin/dashboard" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Update UI based on transaction type
+    function updateTypeUI() {
+      const type = document.getElementById('type').value;
+      const typeInfoText = document.getElementById('typeInfoText');
+      const amountInput = document.getElementById('amount');
+      const typeInfo = document.getElementById('typeInfo');
+      
+      if (type === 'deposit') {
+        typeInfoText.textContent = 'Deposit will add to user\'s balance when marked as success';
+        typeInfo.className = 'mb-4 p-3 bg-green-50 rounded-lg';
+        amountInput.placeholder = 'Enter deposit amount';
+      } else {
+        typeInfoText.textContent = 'Withdrawal will deduct from user\'s balance when marked as success';
+        typeInfo.className = 'mb-4 p-3 bg-red-50 rounded-lg';
+        amountInput.placeholder = 'Enter withdrawal amount';
+      }
+    }
+
+    // Form submission spinner
+    document.getElementById('historyForm').addEventListener('submit', function() {
+      const btn = document.getElementById('submitBtn');
+      const txt = document.getElementById('submitText');
+      const spn = document.getElementById('submitSpinner');
+      btn.disabled = true;
+      txt.style.display = 'none';
+      spn.style.display = 'inline-block';
+    });
+
+    // Search user function
+    async function searchUser() {
+      const username = document.getElementById('searchUsername').value.trim();
+      if (!username) {
+        alert('Please enter a username to search');
+        return;
+      }
+
+      try {
+        const response = await fetch('/admin/search-user?username=' + encodeURIComponent(username));
+        const data = await response.json();
+        
+        const userInfoDisplay = document.getElementById('userInfoDisplay');
+        const foundUsername = document.getElementById('foundUsername');
+        const usernameInput = document.getElementById('username');
+
+        if (data.exists) {
+          userInfoDisplay.classList.add('show');
+          foundUsername.textContent = data.username;
+          usernameInput.value = data.username;
+          usernameInput.style.borderColor = '#48bb78';
+          usernameInput.style.backgroundColor = '#f0fff4';
+        } else {
+          userInfoDisplay.classList.remove('show');
+          usernameInput.value = username;
+          usernameInput.style.borderColor = '#fc8181';
+          usernameInput.style.backgroundColor = '#fff5f5';
+          alert('User not found! The username will be used as entered, but note that successful transactions require a valid user.');
+        }
+      } catch (error) {
+        console.error('Search error:', error);
+        alert('Error searching for user');
+      }
+    }
+
+    // Auto-search if username is pre-filled
+    document.addEventListener('DOMContentLoaded', function() {
+      const searchInput = document.getElementById('searchUsername');
+      if (searchInput.value) {
+        searchUser();
+      }
+      updateTypeUI(); // Initialize type UI
+    });
+
+    // Handle flash messages auto-dismiss
+    setTimeout(() => {
+      const alerts = document.querySelectorAll('.alert');
+      alerts.forEach(alert => {
+        alert.style.transition = 'opacity 0.5s';
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 500);
+      });
+    }, 5000);
+
+    // Add confirmation for withdrawal success
+    document.getElementById('status').addEventListener('change', function(e) {
+      const type = document.getElementById('type').value;
+      if (type === 'withdrawal' && e.target.value === 'success') {
+        const amount = document.getElementById('amount').value;
+        if (amount && !confirm(`Are you sure you want to mark this withdrawal of $${amount} as SUCCESS? This will deduct from the user's balance.`)) {
+          e.target.value = 'reviewing';
+        }
+      }
+    });
+
+    // Add validation for withdrawal amount
+    document.getElementById('historyForm').addEventListener('submit', async function(e) {
+      const type = document.getElementById('type').value;
+      const status = document.getElementById('status').value;
+      const username = document.getElementById('username').value;
+      const amount = parseFloat(document.getElementById('amount').value);
+
+      if (type === 'withdrawal' && status === 'success') {
+        // Check if user has sufficient balance
+        try {
+          const response = await fetch('/admin/search-user?username=' + encodeURIComponent(username));
+          const data = await response.json();
+          
+          if (!data.exists) {
+            if (!confirm(`User "${username}" not found in database. Withdrawal may fail. Continue anyway?`)) {
+              e.preventDefault();
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('Error checking user:', error);
+        }
+      }
+    });
+  </script>
 </body>
 </html>

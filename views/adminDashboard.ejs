@@ -319,6 +319,8 @@
       <a href="/admin/users">👥 USER STATUS (adjust)</a>
       <a href="/resetOptimizationActivity">🔄 Reset Opt. Activity</a>
       <a href="/optimization-activity">📋 View Opt. Activity</a>
+      <!-- NEW: Deposit History Link -->
+      <a href="/admin/history">💰 Deposit History</a>
       <!-- logout inside sidebar -->
       <div style="flex:1;"></div>
       <a href="/admin/logout" class="logout-button">🚪 Log Out</a>
@@ -379,10 +381,10 @@
         <span style="margin-left: auto; color:#7b8a9b;">last updated · live</span>
       </div>
 
-      <!-- 
+      <!-- -->
         MANAGEMENT CARDS (existing actions, all preserved) 
         only the header area now shows dashboard stats
-      -->
+      
       <div class="card-grid">
         <!-- Generate Referral Code -->
         <div class="card">
@@ -408,12 +410,12 @@
           <p class="card-text">Configure optimization counts for user limits.</p>
           <a href="/setOptimizationCount" class="btn btn-info">Set Count</a>
         </div>
-        <!-- View Withdrawals
+        <!-- View Withdrawals-->
         <div class="card">
           <h5 class="card-title">View Withdrawals</h5>
           <p class="card-text">Manage and view all user withdrawal requests.</p>
           <a href="/withdrawals" class="btn btn-info">View</a>
-        </div> -->
+        </div> 
         <!-- Edit User Balance and VIP Level -->
         <div class="card">
           <h5 class="card-title">Edit User Balance / VIP</h5>
@@ -431,6 +433,12 @@
           <h5 class="card-title">Edit Deposit / frozen</h5>
           <p class="card-text">Edit users Deposit, frozen and pending amounts</p>
           <a href="/editdeposit" class="btn btn-info">Edit</a>
+        </div>
+        <!-- NEW: Deposit History Card -->
+        <div class="card">
+          <h5 class="card-title">💰 Deposit History</h5>
+          <p class="card-text">View and manage all user deposit records, filter by status.</p>
+          <a href="/admin/history" class="btn btn-info">View Deposits</a>
         </div>
         <!-- Reset profits -->
         <div class="card">

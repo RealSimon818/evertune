@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Add Deposit</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+    }
+    .dashboard-container {
+      max-width: 500px;
+      margin: 5% auto;
+      background-color: #ffffff;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .dashboard-title {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #F7594E;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .form-label {
+      font-weight: 500;
+      color: #495057;
+    }
+    .btn-custom {
+      width: 100%;
+      font-weight: bold;
+      border: none;
+    }
+    .back-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .back-link a {
+      color: #F7594E;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+    .alert {
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .alert-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .input-group-custom {
+      position: relative;
+    }
+    .input-group-custom i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #adb5bd;
+      z-index: 10;
+    }
+    .input-group-custom input,
+    .input-group-custom select {
+      padding-left: 40px;
+    }
+    .user-search-section {
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      border: 1px solid #e9ecef;
+    }
+    .user-search-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 15px;
+    }
+    .search-input-group {
+      display: flex;
+      gap: 10px;
+    }
+    .search-input-group input {
+      flex: 1;
+      padding: 10px 15px;
+      border: 1px solid #ced4da;
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+    .search-input-group input:focus {
+      outline: none;
+      border-color: #F7594E;
+      box-shadow: 0 0 0 3px rgba(247, 89, 78, 0.1);
+    }
+    .btn-search {
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+    .btn-search:hover {
+      background-color: #5a6268;
+    }
+    .user-info-display {
+      background-color: #e7f3ff;
+      border: 1px solid #b8daff;
+      border-radius: 6px;
+      padding: 12px 15px;
+      margin-top: 15px;
+      display: none;
+    }
+    .user-info-display.show {
+      display: block;
+    }
+    .user-info-display p {
+      margin: 0;
+      color: #004085;
+      font-weight: 500;
+    }
+    .user-info-display i {
+      color: #007bff;
+      margin-right: 8px;
+    }
+    .nav-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid #e9ecef;
+    }
+    .nav-link-custom {
+      color: #6c757d;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-link-custom:hover {
+      color: #F7594E;
+    }
+    .nav-link-custom i {
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-container">
+    <div class="dashboard-title">
+      <i class="bi bi-plus-circle"></i> Add Deposit
+    </div>
+
+    <% if (message) { %>
+      <div class="alert alert-success">
+        <i class="bi bi-check-circle-fill me-2"></i> <%= message %>
+      </div>
+    <% } %>
+    
+    <% if (error) { %>
+      <div class="alert alert-error">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> <%= error %>
+      </div>
+    <% } %>
+
+    <!-- Search User Section -->
+    <div class="user-search-section">
+      <div class="user-search-title">
+        <i class="bi bi-search me-2"></i> Find User
+      </div>
+      <div class="search-input-group">
+        <input type="text" id="searchUsername" placeholder="Enter username..." value="<%= searchedUsername || '' %>">
+        <button class="btn-search" onclick="searchUser()">
+          <i class="bi bi-search me-1"></i> Search
+        </button>
+      </div>
+      <div class="user-info-display" id="userInfoDisplay">
+        <p><i class="bi bi-person-check-fill"></i> User found: <span id="foundUsername"></span></p>
+      </div>
+    </div>
+
+    <!-- Add Deposit Form -->
+    <form action="/admin/add-history" method="POST" id="depositForm">
+      <!-- Hidden type field set to deposit -->
+      <input type="hidden" name="type" value="deposit">
+
+      <div class="mb-3 input-group-custom">
+        <label for="username" class="form-label">
+          <i class="bi bi-person"></i> Username <span class="text-danger">*</span>
+        </label>
+        <i class="bi bi-person"></i>
+        <input type="text" id="username" name="username" class="form-control" 
+               value="<%= formData?.username || searchedUsername || '' %>" 
+               placeholder="Enter username" required>
+      </div>
+
+      <div class="mb-3 input-group-custom">
+        <label for="amount" class="form-label">
+          <i class="bi bi-currency-dollar"></i> Amount (USDC) <span class="text-danger">*</span>
+        </label>
+        <i class="bi bi-currency-dollar"></i>
+        <input type="number" id="amount" name="amount" class="form-control" 
+               value="<%= formData?.amount || '' %>" 
+               step="0.01" min="1" placeholder="Enter deposit amount" required>
+      </div>
+
+      <div class="mb-4 input-group-custom">
+        <label for="status" class="form-label">
+          <i class="bi bi-flag"></i> Status <span class="text-danger">*</span>
+        </label>
+        <i class="bi bi-flag"></i>
+        <select class="form-control" id="status" name="status" required>
+          <option value="reviewing" <%= formData?.status === 'reviewing' ? 'selected' : '' %>>Reviewing</option>
+          <option value="success" <%= formData?.status === 'success' ? 'selected' : '' %>>Success</option>
+          <option value="rejected" <%= formData?.status === 'rejected' ? 'selected' : '' %>>Rejected</option>
+        </select>
+      </div>
+      
+      <button type="submit" class="btn btn-custom btn-danger text-light" id="submitBtn">
+        <span id="submitText"><i class="bi bi-save me-2"></i> Add Deposit</span>
+        <span id="submitSpinner" class="spinner-border spinner-border-sm" style="display:none;"></span>
+      </button>
+    </form>
+
+    <div class="nav-links">
+      <a href="/admin/history" class="nav-link-custom">
+        <i class="bi bi-list-ul"></i> View All Deposits
+      </a>
+      <a href="/admin/dashboard" class="nav-link-custom">
+        <i class="bi bi-speedometer2"></i> Dashboard
+      </a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Form submission spinner
+    document.getElementById('depositForm').addEventListener('submit', function() {
+      const btn = document.getElementById('submitBtn');
+      const txt = document.getElementById('submitText');
+      const spn = document.getElementById('submitSpinner');
+      btn.disabled = true;
+      txt.style.display = 'none';
+      spn.style.display = 'inline-block';
+    });
+
+    // Search user function
+    async function searchUser() {
+      const username = document.getElementById('searchUsername').value.trim();
+      if (!username) {
+        alert('Please enter a username to search');
+        return;
+      }
+
+      try {
+        const response = await fetch('/admin/search-user?username=' + encodeURIComponent(username));
+        const data = await response.json();
+        
+        const userInfoDisplay = document.getElementById('userInfoDisplay');
+        const foundUsername = document.getElementById('foundUsername');
+        const usernameInput = document.getElementById('username');
+
+        if (data.exists) {
+          userInfoDisplay.classList.add('show');
+          foundUsername.textContent = data.username;
+          usernameInput.value = data.username;
+          usernameInput.style.borderColor = '#28a745';
+          usernameInput.style.backgroundColor = '#f0fff4';
+        } else {
+          userInfoDisplay.classList.remove('show');
+          usernameInput.value = username;
+          usernameInput.style.borderColor = '#dc3545';
+          usernameInput.style.backgroundColor = '#fff5f5';
+          alert('User not found! The username will be used as entered, but note that successful deposits require a valid user.');
+        }
+      } catch (error) {
+        console.error('Search error:', error);
+        alert('Error searching for user');
+      }
+    }
+
+    // Auto-search if username is pre-filled
+    document.addEventListener('DOMContentLoaded', function() {
+      const searchInput = document.getElementById('searchUsername');
+      if (searchInput.value) {
+        searchUser();
+      }
+    });
+
+    // Handle flash messages auto-dismiss
+    setTimeout(() => {
+      const alerts = document.querySelectorAll('.alert');
+      alerts.forEach(alert => {
+        alert.style.transition = 'opacity 0.5s';
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 500);
+      });
+    }, 5000);
+
+    // Add confirmation for deposit success
+    document.getElementById('status').addEventListener('change', function(e) {
+      if (e.target.value === 'success') {
+        const amount = document.getElementById('amount').value;
+        if (amount && !confirm(`Are you sure you want to mark this deposit of $${amount} as SUCCESS? This will add to the user's balance.`)) {
+          e.target.value = 'reviewing';
+        }
+      }
+    });
+  </script>
+</body>
+</html>

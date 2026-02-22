@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - All Deposits</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+    }
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 3% auto;
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .dashboard-title {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #F7594E;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .dashboard-subtitle {
+      text-align: center;
+      color: #6c757d;
+      margin-bottom: 30px;
+    }
+    .alert {
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .alert-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .stat-card:nth-child(2) { background: linear-gradient(135deg, #f6b23d 0%, #f4a81d 100%); }
+    .stat-card:nth-child(3) { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); }
+    .stat-card:nth-child(4) { background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%); }
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 8px 20px;
+      border-radius: 50px;
+      border: 2px solid #dee2e6;
+      background: white;
+      font-weight: 500;
+      color: #495057;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .filter-btn:hover {
+      border-color: #F7594E;
+      color: #F7594E;
+    }
+    .filter-btn.active {
+      background-color: #F7594E;
+      border-color: #F7594E;
+      color: white;
+    }
+    .search-section {
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      border: 1px solid #e9ecef;
+    }
+    .search-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 15px;
+    }
+    .search-input-group {
+      display: flex;
+      gap: 10px;
+    }
+    .search-input-group input {
+      flex: 1;
+      padding: 10px 15px;
+      border: 1px solid #ced4da;
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+    .search-input-group input:focus {
+      outline: none;
+      border-color: #F7594E;
+      box-shadow: 0 0 0 3px rgba(247, 89, 78, 0.1);
+    }
+    .btn-search {
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 6px;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+    .btn-search:hover {
+      background-color: #5a6268;
+    }
+    .table-container {
+      overflow-x: auto;
+      margin-bottom: 25px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th {
+      background-color: #f8f9fa;
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      color: #495057;
+      border-bottom: 2px solid #dee2e6;
+    }
+    td {
+      padding: 15px;
+      border-bottom: 1px solid #e9ecef;
+    }
+    tr:hover {
+      background-color: #f8f9fa;
+    }
+    .status-badge {
+      padding: 5px 12px;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+    .status-reviewing {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+    .status-success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .status-rejected {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    .action-btn {
+      padding: 6px 15px;
+      border-radius: 50px;
+      border: none;
+      font-weight: 500;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background-color: #F7594E;
+      color: white;
+    }
+    .action-btn:hover {
+      background-color: #e63e33;
+      transform: translateY(-2px);
+      color: white;
+    }
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin: 25px 0;
+    }
+    .page-link {
+      padding: 8px 15px;
+      border-radius: 6px;
+      border: 1px solid #dee2e6;
+      color: #6c757d;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .page-link:hover {
+      background-color: #F7594E;
+      color: white;
+      border-color: #F7594E;
+    }
+    .page-link.active {
+      background-color: #F7594E;
+      color: white;
+      border-color: #F7594E;
+    }
+    .nav-links {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #e9ecef;
+    }
+    .nav-link-custom {
+      color: #6c757d;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-link-custom:hover {
+      color: #F7594E;
+    }
+    .btn-add {
+      background-color: #F7594E;
+      color: white;
+      padding: 10px 25px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-add:hover {
+      background-color: #e63e33;
+      transform: translateY(-2px);
+      color: white;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 50px;
+      color: #6c757d;
+    }
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 15px;
+      color: #dee2e6;
+    }
+    .text-muted-small {
+      color: #6c757d;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-container">
+    <div class="dashboard-title">
+      <i class="bi bi-list-ul"></i> All Deposits
+    </div>
+    <div class="dashboard-subtitle">
+      Manage all deposit records
+    </div>
+
+    <% if (message) { %>
+      <div class="alert alert-success">
+        <i class="bi bi-check-circle-fill me-2"></i> <%= message %>
+      </div>
+    <% } %>
+    
+    <% if (error) { %>
+      <div class="alert alert-error">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> <%= error %>
+      </div>
+    <% } %>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value"><%= stats.total %></div>
+        <div class="stat-label">Total Deposits</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value"><%= stats.reviewing %></div>
+        <div class="stat-label">Reviewing</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value"><%= stats.success %></div>
+        <div class="stat-label">Success</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value"><%= stats.rejected %></div>
+        <div class="stat-label">Rejected</div>
+      </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <a href="/admin/history" class="filter-btn <%= !status ? 'active' : '' %>">
+        <i class="bi bi-grid"></i> All
+      </a>
+      <a href="/admin/history?status=reviewing" class="filter-btn <%= status === 'reviewing' ? 'active' : '' %>">
+        <i class="bi bi-hourglass-split"></i> Reviewing
+      </a>
+      <a href="/admin/history?status=success" class="filter-btn <%= status === 'success' ? 'active' : '' %>">
+        <i class="bi bi-check-circle"></i> Success
+      </a>
+      <a href="/admin/history?status=rejected" class="filter-btn <%= status === 'rejected' ? 'active' : '' %>">
+        <i class="bi bi-x-circle"></i> Rejected
+      </a>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section">
+      <div class="search-title">
+        <i class="bi bi-search me-2"></i> Search Deposits
+      </div>
+      <div class="search-input-group">
+        <input type="text" id="searchInput" placeholder="Search by username or transaction ID..." value="<%= search || '' %>">
+        <button class="btn-search" onclick="searchDeposits()">
+          <i class="bi bi-search me-1"></i> Search
+        </button>
+      </div>
+    </div>
+
+    <!-- Deposits Table -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Transaction ID</th>
+            <th>Username</th>
+            <th>Amount (USDC)</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (history.length === 0) { %>
+            <tr>
+              <td colspan="6">
+                <div class="empty-state">
+                  <i class="bi bi-inbox"></i>
+                  <h5>No Deposits Found</h5>
+                  <p class="text-muted-small">No deposit records match your criteria</p>
+                </div>
+              </td>
+            </tr>
+          <% } else { %>
+            <% history.forEach(deposit => { %>
+              <tr>
+                <td><span class="text-muted-small"><%= deposit.transactionId %></span></td>
+                <td><i class="bi bi-person me-1"></i> <strong><%= deposit.username %></strong></td>
+                <td><strong style="color: #28a745;"><%= deposit.amount.toFixed(2) %> USDC</strong></td>
+                <td>
+                  <span class="status-badge status-<%= deposit.status %>">
+                    <%= deposit.status.charAt(0).toUpperCase() + deposit.status.slice(1) %>
+                  </span>
+                </td>
+                <td><span class="text-muted-small"><%= new Date(deposit.createdAt).toLocaleString() %></span></td>
+                <td>
+                  <a href="/admin/edit-history/<%= deposit._id %>" class="action-btn">
+                    <i class="bi bi-pencil"></i> Edit
+                  </a>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <% if (totalPages > 1) { %>
+      <div class="pagination">
+        <% for (let i = 1; i <= totalPages; i++) { %>
+          <a href="?page=<%= i %><%= status ? '&status=' + status : '' %><%= search ? '&search=' + search : '' %>" 
+             class="page-link <%= page === i ? 'active' : '' %>">
+            <%= i %>
+          </a>
+        <% } %>
+      </div>
+    <% } %>
+
+    <!-- Navigation Links -->
+    <div class="nav-links">
+      <a href="/admin/dashboard" class="nav-link-custom">
+        <i class="bi bi-arrow-left"></i> Back to Dashboard
+      </a>
+      <a href="/admin/add-history" class="btn-add">
+        <i class="bi bi-plus-circle"></i> Add New Deposit
+      </a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function searchDeposits() {
+      const search = document.getElementById('searchInput').value.trim();
+      const url = new URL(window.location.href);
+      if (search) {
+        url.searchParams.set('search', search);
+      } else {
+        url.searchParams.delete('search');
+      }
+      url.searchParams.set('page', '1');
+      window.location.href = url.toString();
+    }
+
+    // Handle flash messages auto-dismiss
+    setTimeout(() => {
+      const alerts = document.querySelectorAll('.alert');
+      alerts.forEach(alert => {
+        alert.style.transition = 'opacity 0.5s';
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 500);
+      });
+    }, 5000);
+
+    // Allow Enter key in search input
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        searchDeposits();
+      }
+    });
+  </script>
+</body>
+</html>
