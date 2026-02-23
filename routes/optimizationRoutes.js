@@ -151,7 +151,7 @@ const pendingProfits = adminAmount ? adminAmount.profitAmount : 400; // Default:
   console.log("Limit reached at:", dbOptimizationCount);
         return res.status(400).json({
           success: false,
-          message: 'Optimization count has reached the maximum allowed for your VIP level.',
+          message: 'Promotion count has reached the maximum allowed for your VIP level.',
           contactUsButton: `
         <button onclick="contactSupport()" class="btn btn-primary">
           Contact Us

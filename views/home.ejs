@@ -988,6 +988,23 @@
                     </div>
                 </div>
                 
+        <!-- ===== CREDIT SCORE SECTION ===== -->
+        <div style="margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid rgba(0,0,0,0.1);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <span style="font-size: 0.9rem; font-weight: 600; color: var(--gray-medium);">Credit Score</span>
+            <span style="font-size: 1.1rem; font-weight: 700; color: var(--brand-coral);" id="user-credit-score-range">100%</span>
+          </div>
+          <!-- Progress Bar -->
+          <div style="width: 100%; height: 10px; background-color: #f0f0f0; border-radius: 20px; overflow: hidden; margin-bottom: 8px;">
+            <div id="credit-score-progress" style="width: 100%; height: 100%; background: linear-gradient(90deg, var(--brand-coral), var(--teal-turquoise)); border-radius: 20px;"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--gray-medium);">
+            <span>0%</span>
+            <span>Excellent</span>
+            <span>100%</span>
+          </div>
+        </div>
+                
                 <!-- Profile Links Section (Dropdown) -->
                 <div class="profile-links-section">
                     <div class="profile-section-title" id="profileLinksToggle">
@@ -1337,56 +1354,34 @@
         }
     }
     
-    // Update UI with user data from database
     function updateUserUI(data) {
-        // Update username
-        const usernameElement = document.getElementById('user-username');
-        if (usernameElement) {
-            usernameElement.textContent = data.username || 'User';
-        }
-        
-        // Update wallet balance (remove $ sign, add USD)
-        const walletElement = document.getElementById('user-wallet');
-        if (walletElement) {
-            walletElement.textContent = `${parseFloat(data.totalBalance || 0).toFixed(2)} USD`;
-        }
-        
-        // Update VIP level
-        const vipElement = document.getElementById('user-vip');
-        if (vipElement) {
-            vipElement.textContent = data.vipLevel || 'VIP1';
-        }
-        
-        // Update invitation code
-        const invitationElement = document.getElementById('user-invitation-code');
-        if (invitationElement) {
-            invitationElement.textContent = data.invitationCode || 'N/A';
-        }
-        
-        // Update today's commission
-        const commissionElement = document.getElementById('user-commission');
-        if (commissionElement) {
-            commissionElement.textContent = `${parseFloat(data.todaysProfit || 0).toFixed(2)} USD`;
-        }
-        
-        // Update today's reward
-        const rewardElement = document.getElementById('user-reward');
-        if (rewardElement) {
-            rewardElement.textContent = `${parseFloat(data.todaysProfit || 0).toFixed(2)} USD`;
-        }
-        
-        console.log('Profile data loaded successfully:', data);
+    const set = (id, val) => { 
+        const el = document.getElementById(id); 
+        if (el) el.textContent = val; 
+    };
+    
+    set('user-username',        data.username       || 'User');
+    set('user-wallet',          `${parseFloat(data.totalBalance  || 0).toFixed(2)} USD`);
+    set('user-vip',             data.vipLevel       || 'VIP4');
+    set('user-invitation-code', data.invitationCode || 'N/A');
+    set('user-commission',      `${parseFloat(data.todaysProfit  || 0).toFixed(2)} USD`);
+    set('user-reward',          `${parseFloat(data.todaysReward  || 0).toFixed(2)} USD`);
+    
+    // Handle credit score (always 100% for now, but you can make it dynamic)
+    const creditScore = data.creditScore || '100%';
+    const creditScoreEl = document.getElementById('user-credit-score-range');
+    const progressBar = document.getElementById('credit-score-progress');
+    
+    if (creditScoreEl) {
+        creditScoreEl.textContent = creditScore;
     }
     
-    // Use fallback data if API fails
-    function useFallbackData() {
-        document.getElementById('user-username').textContent = 'User';
-        document.getElementById('user-wallet').textContent = '0.00 USD';
-        document.getElementById('user-vip').textContent = 'VIP1';
-        document.getElementById('user-invitation-code').textContent = 'N/A';
-        document.getElementById('user-commission').textContent = '0.00 USD';
-        document.getElementById('user-reward').textContent = '0.00 USD';
+    // Extract number from percentage (e.g., "100%" -> 100)
+    if (progressBar) {
+        const scoreValue = parseInt(creditScore) || 100;
+        progressBar.style.width = scoreValue + '%';
     }
+}
     
     // Show error notification
     function showErrorNotification(message) {

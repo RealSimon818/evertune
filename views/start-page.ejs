@@ -983,61 +983,164 @@
       transform: translateY(-2px);
     }
     
-    /* Overlay & Loader */
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(27, 27, 27, 0.95);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      visibility: hidden;
-      z-index: 9999;
-    }
     
-    .overlay.show {
-      visibility: visible;
-    }
-    
-    .rotating-circle {
-      width: 80px;
-      height: 80px;
-      border: 5px solid var(--cream-peach);
-      border-top: 5px solid var(--brand-coral);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    .loader-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(27, 27, 27, 0.9);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 10000;
-    }
-    
-    .loader {
-      width: 60px;
-      height: 60px;
-      border: 5px solid var(--cream-peach);
-      border-top: 5px solid var(--brand-coral);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    
+  /* Loader Overlay - Full page but non-intrusive */
+.loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(27, 27, 27, 0.7);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loader-overlay.show {
+  display: flex;
+}
+
+.loader-container {
+  background: var(--pure-white);
+  border-radius: 20px;
+  padding: 30px 40px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  animation: scaleIn 0.3s ease;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.loader-spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid var(--cream-peach);
+  border-top: 5px solid var(--brand-coral);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+.loader-text {
+  font-size: 1rem;
+  color: var(--deep-black);
+  font-weight: 500;
+  margin-top: 10px;
+}
+
+.loader-text small {
+  font-size: 0.85rem;
+  color: var(--gray-medium);
+  display: block;
+  margin-top: 5px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error Message Overlay - Centered */
+.error-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 320px;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(247, 89, 78, 0.3);
+  border-left: 5px solid var(--brand-coral);
+  z-index: 10000;
+  display: none;
+  animation: fadeInScale 0.3s ease;
+}
+
+.error-overlay.show {
+  display: block;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.error-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.error-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(247, 89, 78, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.error-icon i {
+  font-size: 1.8rem;
+  color: var(--brand-coral);
+}
+
+.error-message {
+  flex: 1;
+  font-size: 1rem;
+  color: var(--deep-black);
+  font-weight: 500;
+  line-height: 1.5;
+  padding-top: 5px;
+}
+
+.error-close {
+  background: none;
+  border: none;
+  color: var(--gray-medium);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 5px;
+  transition: color 0.3s ease;
+  flex-shrink: 0;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+}
+
+.error-close:hover {
+  color: var(--brand-coral);
+}
+
+/* Hide the old full-page loader/overlay */
+.overlay {
+  display: none !important;
+}
     /* Responsive Adjustments */
     @media (max-width: 992px) {
       .container-custom {
@@ -1647,6 +1750,23 @@
             </div>
           </div>
           
+        <!-- ===== CREDIT SCORE SECTION ===== -->
+        <div style="margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid rgba(0,0,0,0.1);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <span style="font-size: 0.9rem; font-weight: 600; color: var(--gray-medium);">Credit Score</span>
+            <span style="font-size: 1.1rem; font-weight: 700; color: var(--brand-coral);" id="user-credit-score-range">100%</span>
+          </div>
+          <!-- Progress Bar -->
+          <div style="width: 100%; height: 10px; background-color: #f0f0f0; border-radius: 20px; overflow: hidden; margin-bottom: 8px;">
+            <div id="credit-score-progress" style="width: 100%; height: 100%; background: linear-gradient(90deg, var(--brand-coral), var(--teal-turquoise)); border-radius: 20px;"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--gray-medium);">
+            <span>0%</span>
+            <span>Excellent</span>
+            <span>100%</span>
+          </div>
+        </div>
+          
           <!-- Profile Links Section - EXACT same arrangement as home page -->
           <div class="profile-links-section">
             <div class="profile-section-title" id="profileLinksToggle">
@@ -2009,15 +2129,31 @@
       </div>
     </div>
   </div>
-  
-  <!-- Overlay with rotating circle -->
-  <div class="overlay" id="overlay">
-    <div class="rotating-circle"></div>
+
+    <!-- Loader Overlay -->
+  <div class="loader-overlay" id="loaderOverlay">
+    <div class="loader-container">
+      <div class="loader-spinner"></div>
+      <div class="loader-text">
+        Processing...
+        <small>Please wait</small>
+      </div>
+    </div>
   </div>
   
-  <!-- Loader Overlay -->
-  <div id="loaderOverlay" class="loader-overlay">
-    <div class="loader"></div>
+    <!-- Small Error Message Overlay -->
+  <div class="error-overlay" id="errorOverlay">
+    <div class="error-content">
+      <div class="error-icon">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+      </div>
+      <div class="error-message" id="errorMessage">
+        Error message will appear here
+      </div>
+      <button class="error-close" onclick="closeErrorOverlay()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
   </div>
   
   <!-- Image Modal for Task Submission -->
@@ -2455,96 +2591,10 @@
     }
   }
   
-  // Display error message
-  function displayError(errorMessage) {
-    const loaderOverlay = document.getElementById("loaderOverlay");
-    loaderOverlay.innerHTML = "";
-    loaderOverlay.style.display = "flex";
-    
-    loaderOverlay.innerHTML = `
-      <div style="text-align: center; max-width: 400px; color: white;">
-        <p style="font-size: 14px; color: #f2f2f2;">${errorMessage}</p>
-      </div>
-    `;
-    
-    setTimeout(() => {
-      loaderOverlay.innerHTML = '<div class="loader"></div>';
-      loaderOverlay.style.display = "none";
-      window.location.reload();
-    }, 3000);
-  }
   
-  // Show overlay for Promotion
-  async function showOverlay() {
-    document.getElementById("overlay").classList.add("show");
-    document.getElementById("loaderOverlay").style.display = "flex";
-    
-    // Get VIP level from EJS
-    const vipLevel = "<%= vipLevel || 'VIP1' %>";
-    const username = "<%= username || '' %>";
-    
-    // Generate random task from brands
-    const randomIndex = Math.floor(Math.random() * images.length);
-    const selectedImage = images[randomIndex];
-    const selectedName = names[randomIndex];
-    const selectedUSDC = vipLevel === "VIP1" 
-      ? usdcAmountsVIP1[randomIndex % usdcAmountsVIP1.length] 
-      : usdcAmounts[randomIndex % usdcAmounts.length];
-    
-    const profitRate = getProfitRate(vipLevel);
-    const profit = (selectedUSDC * profitRate).toFixed(2);
-    
-    // Get current Promotion count
-    const optimizationCountElement = document.querySelector('.optimization-count-display span:first-child');
-    let currentCount = parseInt(optimizationCountElement ? optimizationCountElement.textContent : "<%= optimizationCount || 0 %>");
-    const maxCount = parseInt("<%= maxOptimizationCount || 40 %>");
-    const updatedCount = Math.min(currentCount + 1, maxCount);
-    
-    try {
-      const response = await fetch('/api/optimizations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username,
-          selectedImage,
-          imageName: selectedName,
-          usdcAmount: selectedUSDC,
-          profitAmount: profit,
-          optimizationCount: updatedCount,
-          status: 'pending'
-        })
-      });
-      
-      const result = await response.json();
-      
-      if (!result.success) {
-        displayError(result.message || 'Failed to save Promotion');
-      } else {
-        setTimeout(() => displayImageModal(selectedImage, selectedName, selectedUSDC, profit), 500);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      displayError('An error occurred. Please try again.');
-    }
-  }
   
-  // Display image modal
-  function displayImageModal(selectedImage, selectedName, selectedUSDC, profit) {
-    document.getElementById("modalImage").src = selectedImage;
-    document.getElementById("imageName").innerText = selectedName;
-    document.getElementById("usdcAmount").innerText = selectedUSDC;
-    document.getElementById("totalUsdcAmount").innerText = selectedUSDC;
-    document.getElementById("profitAmount").textContent = profit;
-    
-    document.getElementById("loaderOverlay").style.display = "none";
-    document.getElementById("overlay").classList.remove("show");
-    
-    const taskCode = Array.from({ length: 30 }, () => Math.floor(Math.random() * 10)).join('');
-    document.getElementById("taskCode").innerText = taskCode;
-    
-    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
-    modal.show();
-  }
+ 
+  
   
   // Handle submit
   async function handleSubmit() {
@@ -2625,7 +2675,7 @@
   </script>
   
   <script>
-  // History Modal Functionality
+    // History Modal Functionality
   document.addEventListener('DOMContentLoaded', function() {
     // Initialize history modal event listener
     const historyModal = document.getElementById('historyModal');
@@ -2968,6 +3018,203 @@
       overlay.style.display = 'none';
     }, 4000);
   }
+
+    // ===== LOADER FUNCTIONS =====
+  function showLoader(message = 'Processing...') {
+    const loader = document.getElementById('loaderOverlay');
+    const loaderText = loader.querySelector('.loader-text');
+    if (loaderText) {
+      loaderText.innerHTML = message + '<small>Please wait</small>';
+    }
+    loader.classList.add('show');
+  }
+  
+  function hideLoader() {
+    const loader = document.getElementById('loaderOverlay');
+    loader.classList.remove('show');
+  }
+
+  // ===== ERROR HANDLING FUNCTIONS =====
+  function showError(message) {
+    const errorOverlay = document.getElementById('errorOverlay');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    if (errorOverlay && errorMessage) {
+      errorMessage.textContent = message;
+      errorOverlay.classList.add('show');
+      
+      // Auto hide after 5 seconds
+      setTimeout(() => {
+        closeErrorOverlay();
+      }, 5000);
+    } else {
+      console.error('Error overlay not found:', message);
+    }
+  }
+  
+  function closeErrorOverlay() {
+    const errorOverlay = document.getElementById('errorOverlay');
+    if (errorOverlay) {
+      errorOverlay.classList.remove('show');
+    }
+  }
+  
+  // Define displayError function
+  function displayError(errorMessage) {
+    hideLoader(); // Hide loader first
+    showError(errorMessage); // Then show error
+    console.log('Error:', errorMessage);
+  }
+  
+  // Modified showOverlay function - with loader
+  async function showOverlay() {
+    // Show loader first
+    showLoader('Creating promotion...');
+    
+    // Get VIP level from EJS
+    const vipLevel = "<%= vipLevel || 'VIP1' %>";
+    const username = "<%= username || '' %>";
+    
+    // Generate random task from brands
+    const randomIndex = Math.floor(Math.random() * images.length);
+    const selectedImage = images[randomIndex];
+    const selectedName = names[randomIndex];
+    const selectedUSDC = vipLevel === "VIP1" 
+      ? usdcAmountsVIP1[randomIndex % usdcAmountsVIP1.length] 
+      : usdcAmounts[randomIndex % usdcAmounts.length];
+    
+    const profitRate = getProfitRate(vipLevel);
+    const profit = (selectedUSDC * profitRate).toFixed(2);
+    
+    // Get current Promotion count
+    const optimizationCountElement = document.querySelector('.optimization-count-display span:first-child');
+    let currentCount = parseInt(optimizationCountElement ? optimizationCountElement.textContent : "<%= optimizationCount || 0 %>");
+    const maxCount = parseInt("<%= maxOptimizationCount || 40 %>");
+    const updatedCount = Math.min(currentCount + 1, maxCount);
+    
+    try {
+      const response = await fetch('/api/optimizations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username,
+          selectedImage,
+          imageName: selectedName,
+          usdcAmount: selectedUSDC,
+          profitAmount: profit,
+          optimizationCount: updatedCount,
+          status: 'pending'
+        })
+      });
+      
+      const result = await response.json();
+      
+      // Hide loader regardless of result
+      hideLoader();
+      
+      if (!result.success) {
+        displayError(result.message || 'Failed to save Promotion');
+      } else {
+        // Show the image modal directly
+        displayImageModal(selectedImage, selectedName, selectedUSDC, profit);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      hideLoader();
+      displayError('An error occurred. Please try again.');
+    }
+  }
+  
+  // Modified handleSubmit function - with loader
+  async function handleSubmit() {
+    // Show loader
+    showLoader('Submitting promotion...');
+    
+    const username = "<%= username || '' %>";
+    const profitAmount = parseFloat(document.getElementById("profitAmount").textContent) || 0;
+    const usdcAmount = parseFloat(document.getElementById("usdcAmount").textContent) || 0;
+    
+    try {
+      const response = await fetch('/updateProgress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username,
+          todaysProfit: profitAmount,
+          totalBalance: profitAmount
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        // Update optimization count in UI
+        const countElement = document.querySelector('.optimization-count-display span:first-child');
+        if (countElement) {
+          let current = parseInt(countElement.textContent) || 0;
+          countElement.textContent = current + 1;
+        }
+        
+        // Update the count badge
+        const badgeElement = document.querySelector('.optimization-count-badge');
+        if (badgeElement) {
+          let badgeText = badgeElement.textContent;
+          let matches = badgeText.match(/(\d+)\/(\d+)/);
+          if (matches) {
+            let current = parseInt(matches[1]) || 0;
+            let max = parseInt(matches[2]) || 40;
+            badgeElement.textContent = `${current + 1}/${max}`;
+          }
+        }
+        
+        // Close modal
+        const modalElement = document.getElementById('imageModal');
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) modal.hide();
+        
+        // Hide loader
+        hideLoader();
+        
+        // Show success and reload
+        setTimeout(() => window.location.reload(), 500);
+      } else {
+        hideLoader();
+        displayError(result.message || 'Failed to update progress');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      hideLoader();
+      displayError('Network error. Please try again.');
+    }
+  }
+  
+  // Modified displayImageModal function
+  function displayImageModal(selectedImage, selectedName, selectedUSDC, profit) {
+    document.getElementById("modalImage").src = selectedImage;
+    document.getElementById("imageName").innerText = selectedName;
+    document.getElementById("usdcAmount").innerText = selectedUSDC;
+    document.getElementById("totalUsdcAmount").innerText = selectedUSDC;
+    document.getElementById("profitAmount").textContent = profit;
+    
+    const taskCode = Array.from({ length: 30 }, () => Math.floor(Math.random() * 10)).join('');
+    document.getElementById("taskCode").innerText = taskCode;
+    
+    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+    modal.show();
+  }
+  
+  // Add click outside to close error overlay
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add click event to close error overlay when clicking outside
+    document.addEventListener('click', function(event) {
+      const errorOverlay = document.getElementById('errorOverlay');
+      if (errorOverlay && errorOverlay.classList.contains('show')) {
+        if (!errorOverlay.contains(event.target)) {
+          closeErrorOverlay();
+        }
+      }
+    });
+  });
   </script>
 </body>
 </html>
