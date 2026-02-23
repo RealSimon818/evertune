@@ -26,17 +26,17 @@ router.get('/start-page', checkAuthenticated, async (req, res) => {
     // Get invitation code from user data
     const invitationCode = user?.invitationCode || 'N/A';
     
-    // Fetch completed optimizations to get count
-    const completedOptimizations = await Optimization.find({ 
-      username, 
-      status: 'completed' 
-    });
-    
-    const optimizationCount = completedOptimizations ? completedOptimizations.length : 0;
-    
-    // Get latest optimization for freezing point logic
-    const latestOptimization = await Optimization.findOne({ username }).sort({ _id: -1 });
-    const optimizationCout = latestOptimization ? Number(latestOptimization.optimizationCount) : 0;
+    // Get the latest COMPLETED optimization (if any)
+const latestCompleted = await Optimization.findOne({ 
+  username, 
+  status: 'completed' 
+}).sort({ submissionDate: -1 }); // or .sort({ _id: -1 })
+
+const optimizationCount = latestCompleted ? Number(latestCompleted.optimizationCount) : 0;
+
+// (Keep the latestOptimization variable for freezing point if needed elsewhere)
+const latestOptimization = await Optimization.findOne({ username }).sort({ _id: -1 });
+const optimizationCout = latestOptimization;
     
     // Define optimization limits per VIP level
     const optimizationLimits = {
