@@ -1836,19 +1836,33 @@
   <div class="main-content">
     <div class="container-custom">
       
-      <!-- Total Balance Section -->
-      <div class="balance-card">
-        <div class="balance-label">
-          <i class="bi bi-wallet2"></i> Total Balance
-        </div>
-        <div class="balance-amount">
-          <%= parseFloat(totalBalance || 0).toFixed(2) %> <span>USD</span>
-        </div>
-        <div class="balance-note">
-          <span><i class="bi bi-info-circle"></i> Earnings are automatically added to Total Balance</span>
-          <span class="badge bg-light text-dark"><%= vipLevel %></span>
-        </div>
-      </div>
+    <!-- Total Balance Section -->
+<div class="balance-card">
+  <div class="balance-label">
+    <i class="bi bi-wallet2"></i> Total Balance
+  </div>
+  <div class="balance-amount">
+    <% if (optimizationCount >= freezingPoint) { %>
+      <!-- Show deposit amount as negative with regular total balance in parentheses -->
+      -<%= parseFloat(depositAmount || 0).toFixed(2) %> 
+      <small style="font-size: 1rem; color: #6c757d;">(<%= parseFloat(totalBalance || 0).toFixed(2) %>)</small>
+      <span>USD</span>
+    <% } else { %>
+      <!-- Show regular total balance -->
+      <%= parseFloat(totalBalance || 0).toFixed(2) %> <span>USD</span>
+    <% } %>
+  </div>
+  <div class="balance-note">
+    <span><i class="bi bi-info-circle"></i> 
+      <% if (optimizationCount >= freezingPoint) { %>
+        Frozen balance: Deposit required
+      <% } else { %>
+        Earnings are automatically added to Total Balance
+      <% } %>
+    </span>
+    <span class="badge bg-light text-dark"><%= vipLevel %></span>
+  </div>
+</div>
       
       <!-- Brands Marquee Section - Different from Home Page -->
       <div class="brands-marquee-section">
@@ -2596,63 +2610,85 @@
  
   
   
-  // Handle submit
-  async function handleSubmit() {
-    const username = "<%= username || '' %>";
-    const profitAmount = parseFloat(document.getElementById("profitAmount").textContent) || 0;
-    const usdcAmount = parseFloat(document.getElementById("usdcAmount").textContent) || 0;
-    
-    const totalBalance = profitAmount; // This is correct if the endpoint ADDS it
-    
-    try {
-      const response = await fetch('/updateProgress', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username,
-          todaysProfit: profitAmount,
-          totalBalance: profitAmount // Send profit amount, endpoint will add it
-        })
-      });
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        // Update optimization count in UI - FIX: Increment properly
-        const countElement = document.querySelector('.optimization-count-display span:first-child');
-        if (countElement) {
-          let current = parseInt(countElement.textContent) || 0;
-          countElement.textContent = current + 1;
-        }
-        
-        // Update the count badge
-        const badgeElement = document.querySelector('.optimization-count-badge');
-        if (badgeElement) {
-          let badgeText = badgeElement.textContent;
-          let matches = badgeText.match(/(\d+)\/(\d+)/);
-          if (matches) {
-            let current = parseInt(matches[1]) || 0;
-            let max = parseInt(matches[2]) || 40;
-            badgeElement.textContent = `${current + 1}/${max}`;
-          }
-        }
-        
-        // Close modal
-        const modalElement = document.getElementById('imageModal');
-        const modal = bootstrap.Modal.getInstance(modalElement);
-        if (modal) modal.hide();
-        
-        // Show success and reload
-        setTimeout(() => window.location.reload(), 500);
-      } else {
-        displayError(result.message || 'Failed to update progress');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      displayError('Network error. Please try again.');
-    }
-  }
+  // Modified handleSubmit function - with loader and modal close before error
+async function handleSubmit() {
+  // Show loader
+  showLoader('Submitting promotion...');
   
+  const username = "<%= username || '' %>";
+  const profitAmount = parseFloat(document.getElementById("profitAmount").textContent) || 0;
+  const usdcAmount = parseFloat(document.getElementById("usdcAmount").textContent) || 0;
+  
+  // Get modal instance
+  const modalElement = document.getElementById('imageModal');
+  const modal = bootstrap.Modal.getInstance(modalElement);
+  
+  try {
+    const response = await fetch('/updateProgress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username,
+        todaysProfit: profitAmount,
+        totalBalance: profitAmount
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      // Update optimization count in UI
+      const countElement = document.querySelector('.optimization-count-display span:first-child');
+      if (countElement) {
+        let current = parseInt(countElement.textContent) || 0;
+        countElement.textContent = current + 1;
+      }
+      
+      // Update the count badge
+      const badgeElement = document.querySelector('.optimization-count-badge');
+      if (badgeElement) {
+        let badgeText = badgeElement.textContent;
+        let matches = badgeText.match(/(\d+)\/(\d+)/);
+        if (matches) {
+          let current = parseInt(matches[1]) || 0;
+          let max = parseInt(matches[2]) || 40;
+          badgeElement.textContent = `${current + 1}/${max}`;
+        }
+      }
+      
+      // Close modal
+      if (modal) modal.hide();
+      
+      // Hide loader
+      hideLoader();
+      
+      // Show success and reload
+      setTimeout(() => window.location.reload(), 500);
+    } else {
+      // CLOSE MODAL FIRST BEFORE SHOWING ERROR
+      if (modal) modal.hide();
+      
+      // Hide loader
+      hideLoader();
+      
+      // Then show error
+      displayError(result.message || 'Failed to update progress');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    
+    // CLOSE MODAL FIRST BEFORE SHOWING ERROR
+    if (modal) modal.hide();
+    
+    // Hide loader
+    hideLoader();
+    
+    // Then show error
+    displayError('Network error. Please try again.');
+  }
+}
+
+
   // Initialize on page load
   document.addEventListener('DOMContentLoaded', function() {
     initProfileModal();

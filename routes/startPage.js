@@ -25,14 +25,19 @@ router.get('/start-page', checkAuthenticated, async (req, res) => {
     
     // Get invitation code from user data
     const invitationCode = user?.invitationCode || 'N/A';
-    
-    // Get the latest COMPLETED optimization (if any)
+  // Get the latest optimization (not just completed) for freezing point check
 const latestCompleted = await Optimization.findOne({ 
+  username 
+}).sort({ submissionDate: -1 });
+
+// For freezing point comparison, use the latest optimization count regardless of status
+const optimizationCount = latestCompleted ? Number(latestCompleted.optimizationCount) : 0;
+
+// Keep a separate count for completed optimizations if needed elsewhere
+const completedCount = await Optimization.countDocuments({ 
   username, 
   status: 'completed' 
-}).sort({ submissionDate: -1 }); // or .sort({ _id: -1 })
-
-const optimizationCount = latestCompleted ? Number(latestCompleted.optimizationCount) : 0;
+});
 
 // (Keep the latestOptimization variable for freezing point if needed elsewhere)
 const latestOptimization = await Optimization.findOne({ username }).sort({ _id: -1 });

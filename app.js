@@ -615,7 +615,7 @@ app.post('/updateProgress', checkAuthenticated, async (req, res) => {
       console.log('Update blocked: Optimization count is greater than or equal to freezing point.');
       return res.status(400).json({
         success: false,
-        message: 'Optimization limit reached. Unable to update progress.',
+        message: 'Freezing point reached',
       });
     }
 
