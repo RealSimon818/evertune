@@ -2090,12 +2090,18 @@
   <div class="modal fade history-modal" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">
       <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="historyModalLabel">
-            <i class="bi bi-clock-history me-2"></i>Promotion History
-          </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
+       <!-- Add this after the modal-header div, before modal-body -->
+<div class="modal-header">
+  <h5 class="modal-title" id="historyModalLabel">
+    <i class="bi bi-clock-history me-2"></i>Promotion History
+  </h5>
+  <div class="d-flex gap-2">
+    <button class="btn btn-sm btn-outline-primary" onclick="manualRefreshHistory()" title="Refresh data">
+      <i class="bi bi-arrow-repeat"></i> Refresh
+    </button>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  </div>
+</div>
         <div class="modal-body p-4">
           <!-- Loader inside modal -->
           <div id="historyLoader" class="text-center my-5" style="display: none;">
@@ -2124,13 +2130,16 @@
           </div>
           
           <!-- Cards Container -->
-          <div id="history-cards-container" class="row g-3">
-            <!-- Cards will be dynamically inserted here -->
-            <div class="col-12 text-center py-5" id="history-no-data" style="display: none;">
-              <i class="bi bi-inbox" style="font-size: 3rem; color: var(--gray-light);"></i>
-              <p class="mt-3 text-muted">No Promotion history available</p>
-            </div>
-          </div>
+         <!-- Cards Container -->
+<div id="history-cards-container" class="row g-3">
+  <!-- Cards will be dynamically inserted here -->
+</div>
+
+<!-- No data message - OUTSIDE the container -->
+<div class="col-12 text-center py-5" id="history-no-data" style="display: none;">
+  <i class="bi bi-inbox" style="font-size: 3rem; color: var(--gray-light);"></i>
+  <p class="mt-3 text-muted">No Promotion history available</p>
+</div>
           
           <!-- Submit All Button (shown when pending/frozen exist) -->
           <div id="history-submit-container" class="text-center mt-4" style="display: none;">
@@ -2218,427 +2227,505 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   
   <script>
-  // Brand-focused image assets - Luxury, Fashion, Automotive, Lifestyle
-  const images = [
-    // Luxury Fashion & Accessories
-    '/images/louis-vuitton-bag.jpg',
-    '/images/gucci-belt.jpg',
-    '/images/hermes-scarf.jpg', 
-    '/images/chanel-perfume.jpg',
-    '/images/prada-sunglasses.jpg',
-    '/images/versace-dress.jpg',
-    '/images/dior-handbag.jpg',
-    '/images/burberry-coat.jpg',
-    '/images/cartier-watch.jpg',
-    '/images/tiffany-necklace.jpg',
-    '/images/rolex-watch.jpg',
-    '/images/armani-suit.jpg',
-    '/images/balenciaga-sneakers.jpg',
-    '/images/fendi-bag.jpg',
-    '/images/yves-saint-laurent-heels.jpg',
-    
-    // Automotive
-    '/images/mercedes-benz.jpg',
-    '/images/bmw-series.jpg',
-    '/images/audi-r8.jpg',
-    '/images/porsche-911.jpg',
-    '/images/tesla-model-s.jpg',
-    '/images/ferrari-488.jpg',
-    '/images/lamborghini-urus.jpg',
-    '/images/range-rover-sport.jpg',
-    '/images/lexus-lx.jpg',
-    '/images/bentley-continental.jpg',
-    
-    // Beauty & Cosmetics
-    '/images/lancome-serum.jpg',
-    '/images/estee-lauder-cream.jpg',
-    '/images/mac-lipstick.jpg',
-    '/images/clarins-oil.jpg',
-    '/images/loreal-shampoo.jpg',
-    '/images/dior-makeup.jpg',
-    '/images/chanel-foundation.jpg',
-    '/images/ysl-lipstick.jpg',
-    '/images/guerlain-perfume.jpg',
-    '/images/shiseido-cream.jpg',
-    
-    // Food & Beverage
-    '/images/coca-cola.jpg',
-    '/images/pepsi-cola.jpg',
-    '/images/nestle-coffee.jpg',
-    '/images/starbucks-reserve.jpg',
-    '/images/red-bull.jpg',
-    '/images/monster-energy.jpg',
-    '/images/danone-yogurt.jpg',
-    '/images/heineken-beer.jpg',
-    '/images/corona-extra.jpg',
-    '/images/johnnie-walker.jpg',
-    '/images/hennessy-cognac.jpg',
-    '/images/moet-chandon.jpg',
-    
-    // Sportswear & Athletic
-    '/images/nike-air-max.jpg',
-    '/images/adidas-ultraboost.jpg',
-    '/images/puma-suede.jpg',
-    '/images/under-armour-hoodie.jpg',
-    '/images/rebook-classic.jpg',
-    '/images/new-balance-574.jpg',
-    '/images/asics-gel.jpg',
-    '/images/fila-disruptor.jpg',
-    
-    // Technology & Electronics
-    '/images/apple-iphone-15.jpg',
-    '/images/samsung-s25.jpg',
-    '/images/sony-headphones.jpg',
-    '/images/bose-speaker.jpg',
-    '/images/dell-xps-13.jpg',
-    '/images/hp-spectre.jpg',
-    '/images/canon-eos-r6.jpg',
-    '/images/nintendo-switch-2.jpg',
-    '/images/xbox-series-x-console.jpg',
-    '/images/ps5-digital.jpg',
-    
-    // Watches & Jewelry
-    '/images/omega-seamaster.jpg',
-    '/images/tag-heuer-carrera.jpg',
-    '/images/breitling-navitimer.jpg',
-    '/images/hublot-big-bang.jpg',
-    '/images/patek-philippe.jpg',
-    '/images/audemars-piguet.jpg',
-    '/images/bvlgari-ring.jpg',
-    '/images/cartier-love-bracelet.jpg',
-    
-    // Home & Living
-    '/images/dyson-vacuum.jpg',
-    '/images/sonos-speaker.jpg',
-    '/images/bang-olufsen.jpg',
-    '/images/philips-hue.jpg',
-    '/images/kitchenaid-mixer.jpg',
-    '/images/smeg-fridge.jpg',
-    '/images/henckels-knives.jpg',
-    '/images/le-creuset-pot.jpg'
-  ];
+// Brand-focused image assets - Luxury, Fashion, Automotive, Lifestyle
+const images = [
+  '/images/louis-vuitton-bag.jpg',
+  '/images/gucci-belt.jpg',
+  '/images/hermes-scarf.jpg', 
+  '/images/chanel-perfume.jpg',
+  '/images/prada-sunglasses.jpg',
+  '/images/versace-dress.jpg',
+  '/images/dior-handbag.jpg',
+  '/images/burberry-coat.jpg',
+  '/images/cartier-watch.jpg',
+  '/images/tiffany-necklace.jpg',
+  '/images/rolex-watch.jpg',
+  '/images/armani-suit.jpg',
+  '/images/balenciaga-sneakers.jpg',
+  '/images/fendi-bag.jpg',
+  '/images/yves-saint-laurent-heels.jpg',
+  '/images/mercedes-benz.jpg',
+  '/images/bmw-series.jpg',
+  '/images/audi-r8.jpg',
+  '/images/porsche-911.jpg',
+  '/images/tesla-model-s.jpg',
+  '/images/ferrari-488.jpg',
+  '/images/lamborghini-urus.jpg',
+  '/images/range-rover-sport.jpg',
+  '/images/lexus-lx.jpg',
+  '/images/bentley-continental.jpg',
+  '/images/lancome-serum.jpg',
+  '/images/estee-lauder-cream.jpg',
+  '/images/mac-lipstick.jpg',
+  '/images/clarins-oil.jpg',
+  '/images/loreal-shampoo.jpg',
+  '/images/dior-makeup.jpg',
+  '/images/chanel-foundation.jpg',
+  '/images/ysl-lipstick.jpg',
+  '/images/guerlain-perfume.jpg',
+  '/images/shiseido-cream.jpg',
+  '/images/coca-cola.jpg',
+  '/images/pepsi-cola.jpg',
+  '/images/nestle-coffee.jpg',
+  '/images/starbucks-reserve.jpg',
+  '/images/red-bull.jpg',
+  '/images/monster-energy.jpg',
+  '/images/danone-yogurt.jpg',
+  '/images/heineken-beer.jpg',
+  '/images/corona-extra.jpg',
+  '/images/johnnie-walker.jpg',
+  '/images/hennessy-cognac.jpg',
+  '/images/moet-chandon.jpg',
+  '/images/nike-air-max.jpg',
+  '/images/adidas-ultraboost.jpg',
+  '/images/puma-suede.jpg',
+  '/images/under-armour-hoodie.jpg',
+  '/images/rebook-classic.jpg',
+  '/images/new-balance-574.jpg',
+  '/images/asics-gel.jpg',
+  '/images/fila-disruptor.jpg',
+  '/images/apple-iphone-15.jpg',
+  '/images/samsung-s25.jpg',
+  '/images/sony-headphones.jpg',
+  '/images/bose-speaker.jpg',
+  '/images/dell-xps-13.jpg',
+  '/images/hp-spectre.jpg',
+  '/images/canon-eos-r6.jpg',
+  '/images/nintendo-switch-2.jpg',
+  '/images/xbox-series-x-console.jpg',
+  '/images/ps5-digital.jpg',
+  '/images/omega-seamaster.jpg',
+  '/images/tag-heuer-carrera.jpg',
+  '/images/breitling-navitimer.jpg',
+  '/images/hublot-big-bang.jpg',
+  '/images/patek-philippe.jpg',
+  '/images/audemars-piguet.jpg',
+  '/images/bvlgari-ring.jpg',
+  '/images/cartier-love-bracelet.jpg',
+  '/images/dyson-vacuum.jpg',
+  '/images/sonos-speaker.jpg',
+  '/images/bang-olufsen.jpg',
+  '/images/philips-hue.jpg',
+  '/images/kitchenaid-mixer.jpg',
+  '/images/smeg-fridge.jpg',
+  '/images/henckels-knives.jpg',
+  '/images/le-creuset-pot.jpg'
+];
 
-  const names = [
-    // Luxury Fashion & Accessories
-    'Louis Vuitton Neverfull Bag',
-    'Gucci GG Marmont Belt',
-    'Hermès Silk Carre Scarf',
-    'Chanel No.5 Perfume',
-    'Prada Linea Rossa Sunglasses',
-    'Versace Medusa Dress',
-    'Dior Lady Handbag',
-    'Burberry Kensington Coat',
-    'Cartier Ballon Bleu Watch',
-    'Tiffany & Co. Heart Tag Necklace',
-    'Rolex Submariner Date',
-    'Armani Emporio Suit',
-    'Balenciaga Triple S Sneakers',
-    'Fendi Peekaboo Bag',
-    'YSL Tribtoo Heels',
-    
-    // Automotive
-    'Mercedes-Benz S-Class',
-    'BMW 7 Series',
-    'Audi R8 V10',
-    'Porsche 911 Turbo S',
-    'Tesla Model S Plaid',
-    'Ferrari 488 GTB',
-    'Lamborghini Urus',
-    'Range Rover Sport',
-    'Lexus LX 600',
-    'Bentley Continental GT',
-    
-    // Beauty & Cosmetics
-    'Lancôme Advanced Génifique Serum',
-    'Estée Lauder Revitalizing Cream',
-    'MAC Ruby Woo Lipstick',
-    'Clarins Huile Santal Oil',
-    'L\'Oréal Professionnel Shampoo',
-    'Dior Forever Foundation',
-    'Chanel Les Beiges Powder',
-    'YSL Tatouage Couture Lipstick',
-    'Guerlain Mon Guerlain Perfume',
-    'Shiseido Ultimune Serum',
-    
-    // Food & Beverage
-    'Coca-Cola Classic',
-    'Pepsi Next Generation',
-    'Nestlé Gold Blend Coffee',
-    'Starbucks Reserve Blend',
-    'Red Bull Energy Drink',
-    'Monster Energy Ultra',
-    'Danone Oikos Yogurt',
-    'Heineken Premium Lager',
-    'Corona Extra Beer',
-    'Johnnie Walker Blue Label',
-    'Hennessy X.O Cognac',
-    'Moët & Chandon Imperial',
-    
-    // Sportswear & Athletic
-    'Nike Air Max 270',
-    'Adidas Ultraboost 23',
-    'Puma Suede Classic',
-    'Under Armour Rival Hoodie',
-    'Reebok Club C 85',
-    'New Balance 574 Core',
-    'Asics Gel-Kayano 29',
-    'Fila Disruptor II',
-    
-    // Technology & Electronics
-    'Apple iPhone 15 Pro Max',
-    'Samsung Galaxy S25 Ultra',
-    'Sony WH-1000XM5 Headphones',
-    'Bose QuietComfort Ultra',
-    'Dell XPS 13 Plus',
-    'HP Spectre x360',
-    'Canon EOS R6 Mark II',
-    'Nintendo Switch OLED',
-    'Xbox Series X Console',
-    'PlayStation 5 Digital Edition',
-    
-    // Watches & Jewelry
-    'Omega Seamaster Diver',
-    'Tag Heuer Carrera Chronograph',
-    'Breitling Navitimer B01',
-    'Hublot Big Bang Unico',
-    'Patek Philippe Nautilus',
-    'Audemars Piguet Royal Oak',
-    'Bvlgari Serpenti Ring',
-    'Cartier Love Bracelet',
-    
-    // Home & Living
-    'Dyson V15 Detect Vacuum',
-    'Sonos Era 300 Speaker',
-    'Bang & Olufsen Beosound',
-    'Philips Hue White Ambiance',
-    'KitchenAid Artisan Mixer',
-    'Smeg FAB28 Refrigerator',
-    'Zwilling Henckels Knives Set',
-    'Le Creuset Dutch Oven'
-  ];
+const names = [
+  'Louis Vuitton Neverfull Bag',
+  'Gucci GG Marmont Belt',
+  'Hermès Silk Carre Scarf',
+  'Chanel No.5 Perfume',
+  'Prada Linea Rossa Sunglasses',
+  'Versace Medusa Dress',
+  'Dior Lady Handbag',
+  'Burberry Kensington Coat',
+  'Cartier Ballon Bleu Watch',
+  'Tiffany & Co. Heart Tag Necklace',
+  'Rolex Submariner Date',
+  'Armani Emporio Suit',
+  'Balenciaga Triple S Sneakers',
+  'Fendi Peekaboo Bag',
+  'YSL Tribtoo Heels',
+  'Mercedes-Benz S-Class',
+  'BMW 7 Series',
+  'Audi R8 V10',
+  'Porsche 911 Turbo S',
+  'Tesla Model S Plaid',
+  'Ferrari 488 GTB',
+  'Lamborghini Urus',
+  'Range Rover Sport',
+  'Lexus LX 600',
+  'Bentley Continental GT',
+  'Lancôme Advanced Génifique Serum',
+  'Estée Lauder Revitalizing Cream',
+  'MAC Ruby Woo Lipstick',
+  'Clarins Huile Santal Oil',
+  'L\'Oréal Professionnel Shampoo',
+  'Dior Forever Foundation',
+  'Chanel Les Beiges Powder',
+  'YSL Tatouage Couture Lipstick',
+  'Guerlain Mon Guerlain Perfume',
+  'Shiseido Ultimune Serum',
+  'Coca-Cola Classic',
+  'Pepsi Next Generation',
+  'Nestlé Gold Blend Coffee',
+  'Starbucks Reserve Blend',
+  'Red Bull Energy Drink',
+  'Monster Energy Ultra',
+  'Danone Oikos Yogurt',
+  'Heineken Premium Lager',
+  'Corona Extra Beer',
+  'Johnnie Walker Blue Label',
+  'Hennessy X.O Cognac',
+  'Moët & Chandon Imperial',
+  'Nike Air Max 270',
+  'Adidas Ultraboost 23',
+  'Puma Suede Classic',
+  'Under Armour Rival Hoodie',
+  'Reebok Club C 85',
+  'New Balance 574 Core',
+  'Asics Gel-Kayano 29',
+  'Fila Disruptor II',
+  'Apple iPhone 15 Pro Max',
+  'Samsung Galaxy S25 Ultra',
+  'Sony WH-1000XM5 Headphones',
+  'Bose QuietComfort Ultra',
+  'Dell XPS 13 Plus',
+  'HP Spectre x360',
+  'Canon EOS R6 Mark II',
+  'Nintendo Switch OLED',
+  'Xbox Series X Console',
+  'PlayStation 5 Digital Edition',
+  'Omega Seamaster Diver',
+  'Tag Heuer Carrera Chronograph',
+  'Breitling Navitimer B01',
+  'Hublot Big Bang Unico',
+  'Patek Philippe Nautilus',
+  'Audemars Piguet Royal Oak',
+  'Bvlgari Serpenti Ring',
+  'Cartier Love Bracelet',
+  'Dyson V15 Detect Vacuum',
+  'Sonos Era 300 Speaker',
+  'Bang & Olufsen Beosound',
+  'Philips Hue White Ambiance',
+  'KitchenAid Artisan Mixer',
+  'Smeg FAB28 Refrigerator',
+  'Zwilling Henckels Knives Set',
+  'Le Creuset Dutch Oven'
+];
 
-  const usdcAmounts = [
-    // Premium brand pricing
-    720, 300, 220, 150,
-      1000, 600, 500, 450,
-      800, 750, 670, 350,
-      540, 380, 260, 910,
-      880, 430, 990, 520,
-      930, 210, 430, 340,
-      150, 640, 830, 920,
-      310, 450, 720, 690,
-      780, 630, 540, 470,
-      250, 160, 810, 350,
-      390, 760, 420, 480,
-      910, 540, 310, 490,
-      270, 660, 510, 330,
-      810, 740, 390, 590,
-      720, 300, 220, 150,
-      1000, 600, 500, 450,
-      800, 750, 670, 350,
-      540, 380, 260, 910,
-      880, 430, 990, 520,
-      930, 210, 430, 340,
-      150, 640, 830, 920,
-      310, 450, 720, 690,
-      780, 630, 540, 470,
-      250, 160, 810, 350,
-      390, 760, 420, 480,
-      910, 540, 310, 490,
-      270, 660, 510, 330,
-      670, 690, 570, 1000
-  ];
+const usdcAmounts = [
+  720, 300, 220, 150, 1000, 600, 500, 450,
+  800, 750, 670, 350, 540, 380, 260, 910,
+  880, 430, 990, 520, 930, 210, 430, 340,
+  150, 640, 830, 920, 310, 450, 720, 690,
+  780, 630, 540, 470, 250, 160, 810, 350,
+  390, 760, 420, 480, 910, 540, 310, 490,
+  270, 660, 510, 330, 810, 740, 390, 590,
+  720, 300, 220, 150, 1000, 600, 500, 450,
+  800, 750, 670, 350, 540, 380, 260, 910,
+  880, 430, 990, 520, 930, 210, 430, 340,
+  150, 640, 830, 920, 310, 450, 720, 690,
+  780, 630, 540, 470, 250, 160, 810, 350,
+  390, 760, 420, 480, 910, 540, 310, 490,
+  270, 660, 510, 330, 670, 690, 570, 1000
+];
 
-  const usdcAmountsVIP1 = [
-    // VIP1 discounted pricing
-    15, 22, 18, 25, 30, 19, 28, 32, 24, 26,
-    21, 23, 27, 29, 31, 33, 35, 37, 39, 41,
-    12, 14, 16, 13, 17, 15, 18, 20, 19, 21,
-    8, 9, 7, 10, 11, 8, 12, 13, 14, 15,
-    42, 38, 44, 46, 48, 50, 52, 54, 45, 47,
-    34, 36, 40, 43, 49, 51, 53, 55, 56, 58,
-    60, 62, 64, 66, 68, 70, 72, 74, 76, 78,
-    80, 82, 84, 86, 88, 90, 92, 94, 96, 98,
-    100, 105, 110, 115, 120, 125, 130, 135, 140, 145
-  ];
+const usdcAmountsVIP1 = [
+  15, 22, 18, 25, 30, 19, 28, 32, 24, 26,
+  21, 23, 27, 29, 31, 33, 35, 37, 39, 41,
+  12, 14, 16, 13, 17, 15, 18, 20, 19, 21,
+  8, 9, 7, 10, 11, 8, 12, 13, 14, 15,
+  42, 38, 44, 46, 48, 50, 52, 54, 45, 47,
+  34, 36, 40, 43, 49, 51, 53, 55, 56, 58,
+  60, 62, 64, 66, 68, 70, 72, 74, 76, 78,
+  80, 82, 84, 86, 88, 90, 92, 94, 96, 98,
+  100, 105, 110, 115, 120, 125, 130, 135, 140, 145
+];
 
-  let index = 0;
-  let intervalId = null;
+// ===== PROFILE MODAL FUNCTIONS =====
+function initProfileModal() {
+  const profileMenuToggle = document.getElementById('profileMenuToggle');
+  const closeProfileModal = document.getElementById('closeProfileModal');
+  const profileModal = document.getElementById('profileModal');
+  const profileOverlay = document.getElementById('profileOverlay');
+  const profileLinksToggle = document.getElementById('profileLinksToggle');
+  const profileLinksGrid = document.getElementById('profileLinksGrid');
   
-  // Initialize profile modal with enhanced features
-  function initProfileModal() {
-    const profileMenuToggle = document.getElementById('profileMenuToggle');
-    const closeProfileModal = document.getElementById('closeProfileModal');
-    const profileModal = document.getElementById('profileModal');
-    const profileOverlay = document.getElementById('profileOverlay');
-    const profileLinksToggle = document.getElementById('profileLinksToggle');
-    const profileLinksGrid = document.getElementById('profileLinksGrid');
-    
-    // Toggle modal visibility
-    if (profileMenuToggle) {
-      profileMenuToggle.addEventListener('click', function(e) {
-        e.stopPropagation();
-        profileModal.classList.add('show');
-        profileOverlay.classList.add('show');
-        document.body.style.overflow = 'hidden';
-        
-        // Automatically show the profile links with a slight delay
-        setTimeout(() => {
-          if (profileLinksGrid) {
-            profileLinksGrid.classList.add('show');
-            if (profileLinksToggle) {
-              profileLinksToggle.classList.add('active');
-            }
-          }
-        }, 300);
-      });
-    }
-    
-    // Close modal when close button is clicked
-    if (closeProfileModal) {
-      closeProfileModal.addEventListener('click', function() {
-        closeProfileModalFn();
-      });
-    }
-    
-    // Close modal when clicking overlay
-    if (profileOverlay) {
-      profileOverlay.addEventListener('click', function() {
-        closeProfileModalFn();
-      });
-    }
-    
-    // Toggle profile links dropdown with animation
-    if (profileLinksToggle) {
-      profileLinksToggle.addEventListener('click', function(e) {
-        e.stopPropagation();
-        this.classList.toggle('active');
+  if (profileMenuToggle) {
+    profileMenuToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      profileModal.classList.add('show');
+      profileOverlay.classList.add('show');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => {
         if (profileLinksGrid) {
-          profileLinksGrid.classList.toggle('show');
-          
-          // Update chevron icon
-          const chevron = this.querySelector('i.bi-chevron-down, i.bi-chevron-up');
-          if (chevron) {
-            if (profileLinksGrid.classList.contains('show')) {
-              chevron.classList.remove('bi-chevron-down');
-              chevron.classList.add('bi-chevron-up');
-            } else {
-              chevron.classList.remove('bi-chevron-up');
-              chevron.classList.add('bi-chevron-down');
-            }
+          profileLinksGrid.classList.add('show');
+          if (profileLinksToggle) profileLinksToggle.classList.add('active');
+        }
+      }, 300);
+    });
+  }
+  
+  if (closeProfileModal) {
+    closeProfileModal.addEventListener('click', function() {
+      closeProfileModalFn();
+    });
+  }
+  
+  if (profileOverlay) {
+    profileOverlay.addEventListener('click', function() {
+      closeProfileModalFn();
+    });
+  }
+  
+  if (profileLinksToggle) {
+    profileLinksToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      this.classList.toggle('active');
+      if (profileLinksGrid) {
+        profileLinksGrid.classList.toggle('show');
+        const chevron = this.querySelector('i.bi-chevron-down, i.bi-chevron-up');
+        if (chevron) {
+          if (profileLinksGrid.classList.contains('show')) {
+            chevron.classList.remove('bi-chevron-down');
+            chevron.classList.add('bi-chevron-up');
+          } else {
+            chevron.classList.remove('bi-chevron-up');
+            chevron.classList.add('bi-chevron-down');
           }
         }
-      });
-    }
-    
-    // Close modal with Escape key
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && profileModal && profileModal.classList.contains('show')) {
-        closeProfileModalFn();
-      }
-    });
-    
-    // Prevent modal from closing when clicking inside it
-    if (profileModal) {
-      profileModal.addEventListener('click', function(e) {
-        e.stopPropagation();
-      });
-    }
-  }
-  
-  function closeProfileModalFn() {
-    const profileModal = document.getElementById('profileModal');
-    const profileOverlay = document.getElementById('profileOverlay');
-    const profileLinksGrid = document.getElementById('profileLinksGrid');
-    const profileLinksToggle = document.getElementById('profileLinksToggle');
-    
-    if (profileModal) {
-      profileModal.classList.remove('show');
-    }
-    if (profileOverlay) {
-      profileOverlay.classList.remove('show');
-    }
-    document.body.style.overflow = '';
-    
-    // Hide profile links with animation
-    if (profileLinksGrid) {
-      profileLinksGrid.classList.remove('show');
-    }
-    if (profileLinksToggle) {
-      profileLinksToggle.classList.remove('active');
-      
-      // Reset chevron icon
-      const chevron = profileLinksToggle.querySelector('i.bi-chevron-down, i.bi-chevron-up');
-      if (chevron) {
-        chevron.classList.remove('bi-chevron-up');
-        chevron.classList.add('bi-chevron-down');
-      }
-    }
-  }
-  
-  // Profile Menu Functionality
-  function initProfileMenu() {
-    const profileMenuToggle = document.getElementById('profileMenuToggle');
-    const closeProfileMenu = document.getElementById('closeProfileMenu');
-    const profileMenu = document.getElementById('profileMenu');
-    const menuOverlay = document.getElementById('menuOverlay');
-    
-    if (profileMenuToggle) {
-      profileMenuToggle.addEventListener('click', function(e) {
-        e.stopPropagation();
-        profileMenu.classList.toggle('show');
-        menuOverlay.style.display = profileMenu.classList.contains('show') ? 'block' : 'none';
-      });
-    }
-    
-    if (closeProfileMenu) {
-      closeProfileMenu.addEventListener('click', function() {
-        profileMenu.classList.remove('show');
-        menuOverlay.style.display = 'none';
-      });
-    }
-    
-    if (menuOverlay) {
-      menuOverlay.addEventListener('click', function() {
-        profileMenu.classList.remove('show');
-        menuOverlay.style.display = 'none';
-      });
-    }
-    
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && profileMenu.classList.contains('show')) {
-        profileMenu.classList.remove('show');
-        menuOverlay.style.display = 'none';
       }
     });
   }
   
-  // Get profit rate based on VIP level
-  function getProfitRate(vipLevel) {
-    switch(vipLevel) {
-      case 'VIP1': return 0.005;
-      case 'VIP2': return 0.01;
-      case 'VIP3': return 0.015;
-      case 'VIP4': return 0.02;
-      default: return 0.005;
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && profileModal && profileModal.classList.contains('show')) {
+      closeProfileModalFn();
+    }
+  });
+  
+  if (profileModal) {
+    profileModal.addEventListener('click', function(e) {
+      e.stopPropagation();
+    });
+  }
+}
+
+function closeProfileModalFn() {
+  const profileModal = document.getElementById('profileModal');
+  const profileOverlay = document.getElementById('profileOverlay');
+  const profileLinksGrid = document.getElementById('profileLinksGrid');
+  const profileLinksToggle = document.getElementById('profileLinksToggle');
+  
+  if (profileModal) profileModal.classList.remove('show');
+  if (profileOverlay) profileOverlay.classList.remove('show');
+  document.body.style.overflow = '';
+  if (profileLinksGrid) profileLinksGrid.classList.remove('show');
+  if (profileLinksToggle) {
+    profileLinksToggle.classList.remove('active');
+    const chevron = profileLinksToggle.querySelector('i.bi-chevron-down, i.bi-chevron-up');
+    if (chevron) {
+      chevron.classList.remove('bi-chevron-up');
+      chevron.classList.add('bi-chevron-down');
     }
   }
+}
+
+function initProfileMenu() {
+  const profileMenuToggle = document.getElementById('profileMenuToggle');
+  const closeProfileMenu = document.getElementById('closeProfileMenu');
+  const profileMenu = document.getElementById('profileMenu');
+  const menuOverlay = document.getElementById('menuOverlay');
   
+  if (profileMenuToggle && profileMenu) {
+    profileMenuToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      profileMenu.classList.toggle('show');
+      menuOverlay.style.display = profileMenu.classList.contains('show') ? 'block' : 'none';
+    });
+  }
   
+  if (closeProfileMenu) {
+    closeProfileMenu.addEventListener('click', function() {
+      profileMenu.classList.remove('show');
+      menuOverlay.style.display = 'none';
+    });
+  }
   
- 
+  if (menuOverlay) {
+    menuOverlay.addEventListener('click', function() {
+      if (profileMenu) profileMenu.classList.remove('show');
+      menuOverlay.style.display = 'none';
+    });
+  }
   
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && profileMenu && profileMenu.classList.contains('show')) {
+      profileMenu.classList.remove('show');
+      menuOverlay.style.display = 'none';
+    }
+  });
+}
+
+// ===== UTILITY FUNCTIONS =====
+function getProfitRate(vipLevel) {
+  switch(vipLevel) {
+    case 'VIP1': return 0.005;
+    case 'VIP2': return 0.01;
+    case 'VIP3': return 0.015;
+    case 'VIP4': return 0.02;
+    default: return 0.005;
+  }
+}
+
+function showLoader(message = 'Processing...') {
+  const loader = document.getElementById('loaderOverlay');
+  const loaderText = loader.querySelector('.loader-text');
+  if (loaderText) loaderText.innerHTML = message + '<small>Please wait</small>';
+  loader.classList.add('show');
+}
+
+function hideLoader() {
+  const loader = document.getElementById('loaderOverlay');
+  loader.classList.remove('show');
+}
+
+function showError(message) {
+  const errorOverlay = document.getElementById('errorOverlay');
+  const errorMessage = document.getElementById('errorMessage');
+  if (errorOverlay && errorMessage) {
+    errorMessage.textContent = message;
+    errorOverlay.classList.add('show');
+    setTimeout(() => { closeErrorOverlay(); }, 5000);
+  }
+}
+
+function closeErrorOverlay() {
+  const errorOverlay = document.getElementById('errorOverlay');
+  if (errorOverlay) errorOverlay.classList.remove('show');
+}
+
+function displayError(errorMessage) {
+  hideLoader();
+  showError(errorMessage);
+  console.log('Error:', errorMessage);
+}
+
+function showSuccessMessage(message) {
+  const successDiv = document.createElement('div');
+  successDiv.className = 'alert alert-success position-fixed top-50 start-50 translate-middle';
+  successDiv.style.zIndex = '10001';
+  successDiv.style.minWidth = '300px';
+  successDiv.style.textAlign = 'center';
+  successDiv.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
+  successDiv.style.borderRadius = '10px';
+  successDiv.style.padding = '15px 20px';
+  successDiv.innerHTML = `<i class="bi bi-check-circle-fill me-2" style="color: #28a745;"></i><strong>${message}</strong>`;
+  document.body.appendChild(successDiv);
+  setTimeout(() => { successDiv.remove(); }, 2000);
+}
+
+function showHistoryMessage(message, type) {
+  const overlay = document.getElementById('historyMessageOverlay');
+  if (!overlay) return;
+  overlay.className = `alert alert-${type}`;
+  overlay.innerHTML = message;
+  overlay.style.display = 'block';
+  setTimeout(() => { overlay.style.display = 'none'; }, 4000);
+}
+
+function displayImageModal(selectedImage, selectedName, selectedUSDC, profit) {
+  document.getElementById("modalImage").src = selectedImage;
+  document.getElementById("imageName").innerText = selectedName;
+  document.getElementById("usdcAmount").innerText = selectedUSDC;
+  document.getElementById("totalUsdcAmount").innerText = selectedUSDC;
+  document.getElementById("profitAmount").textContent = profit;
+  const taskCode = Array.from({ length: 30 }, () => Math.floor(Math.random() * 10)).join('');
+  document.getElementById("taskCode").innerText = taskCode;
+  const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+  modal.show();
+}
+
+async function refreshUIFromBackend() {
+  try {
+    const res = await fetch('/api/start-page/user-stats?_=' + Date.now(), { cache: 'no-store' });
+    const data = await res.json();
+    if (!data.success) return;
+
+    // Optimization count
+    const countSpan = document.querySelector('.optimization-count-display span:first-child');
+    const badgeElement = document.querySelector('.optimization-count-badge');
+    if (countSpan) countSpan.textContent = data.optimizationCount;
+    if (badgeElement) badgeElement.textContent = `${data.optimizationCount}/${data.maxOptimizationCount}`;
+
+    // Commission card
+    const commissionElement = document.querySelector('.commission-amount');
+    if (commissionElement) commissionElement.innerHTML = `${data.todaysProfit} <span>USD</span>`;
+
+    // Profile panel
+    const userCommission = document.getElementById('user-commission');
+    if (userCommission) userCommission.textContent = `${data.todaysProfit} USD`;
+    const userReward = document.getElementById('user-reward');
+    if (userReward) userReward.textContent = `${data.todaysProfit} USD`;
+    const userWallet = document.getElementById('user-wallet');
+    if (userWallet) userWallet.textContent = `${data.totalBalance} USD`;
+
+    // Balance card - handles both frozen and normal states
+    const balanceElement = document.querySelector('.balance-amount');
+    if (balanceElement) {
+      if (data.isFrozen) {
+        balanceElement.innerHTML = `-${data.depositAmount} <small style="font-size: 1rem; color: #6c757d;">(${data.totalBalance})</small> <span>USD</span>`;
+      } else {
+        balanceElement.innerHTML = `${data.totalBalance} <span>USD</span>`;
+      }
+    }
+  } catch (err) {
+    console.error('Failed to refresh UI stats:', err);
+  }
+}
+
+// ===== MAIN PROMOTION FUNCTIONS =====
+async function showOverlay() {
+  showLoader('Creating promotion...');
   
-  // Modified handleSubmit function - with loader and modal close before error
+  const vipLevel = "<%= vipLevel || 'VIP1' %>";
+  const username = "<%= username || '' %>";
+  
+  const randomIndex = Math.floor(Math.random() * images.length);
+  const selectedImage = images[randomIndex];
+  const selectedName = names[randomIndex];
+  const selectedUSDC = vipLevel === "VIP1"
+    ? usdcAmountsVIP1[randomIndex % usdcAmountsVIP1.length]
+    : usdcAmounts[randomIndex % usdcAmounts.length];
+  
+  const profitRate = getProfitRate(vipLevel);
+  const profit = (selectedUSDC * profitRate).toFixed(2);
+  
+  const optimizationCountElement = document.querySelector('.optimization-count-display span:first-child');
+  let currentCount = parseInt(optimizationCountElement ? optimizationCountElement.textContent : "<%= optimizationCount || 0 %>");
+  const maxCount = parseInt("<%= maxOptimizationCount || 40 %>");
+  const updatedCount = Math.min(currentCount + 1, maxCount);
+  
+  try {
+    const response = await fetch('/api/optimizations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username,
+        selectedImage,
+        imageName: selectedName,
+        usdcAmount: selectedUSDC,
+        profitAmount: profit,
+        optimizationCount: updatedCount,
+        status: 'pending'
+      })
+    });
+    
+    const result = await response.json();
+    hideLoader();
+    
+    if (!result.success) {
+      displayError(result.message || 'Failed to save Promotion');
+    } else {
+      displayImageModal(selectedImage, selectedName, selectedUSDC, profit);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    hideLoader();
+    displayError('An error occurred. Please try again.');
+  }
+}
+
 async function handleSubmit() {
-  // Show loader
+  const submitButton = document.getElementById('submitButton');
   showLoader('Submitting promotion...');
   
   const username = "<%= username || '' %>";
   const profitAmount = parseFloat(document.getElementById("profitAmount").textContent) || 0;
-  const usdcAmount = parseFloat(document.getElementById("usdcAmount").textContent) || 0;
   
-  // Get modal instance
   const modalElement = document.getElementById('imageModal');
   const modal = bootstrap.Modal.getInstance(modalElement);
   
@@ -2656,644 +2743,345 @@ async function handleSubmit() {
     const result = await response.json();
     
     if (result.success) {
-      // Update optimization count in UI
-      const countElement = document.querySelector('.optimization-count-display span:first-child');
-      if (countElement) {
-        let current = parseInt(countElement.textContent) || 0;
-        countElement.textContent = current + 1;
-      }
-      
-      // Update the count badge
-      const badgeElement = document.querySelector('.optimization-count-badge');
-      if (badgeElement) {
-        let badgeText = badgeElement.textContent;
-        let matches = badgeText.match(/(\d+)\/(\d+)/);
-        if (matches) {
-          let current = parseInt(matches[1]) || 0;
-          let max = parseInt(matches[2]) || 40;
-          badgeElement.textContent = `${current + 1}/${max}`;
-        }
-      }
-      
-      // Close modal
       if (modal) modal.hide();
-      
-      // Hide loader
+      await refreshUIFromBackend();
       hideLoader();
-      
-      // Show success and reload
-      setTimeout(() => window.location.reload(), 500);
+      showSuccessMessage('Promotion completed successfully!');
     } else {
-      // CLOSE MODAL FIRST BEFORE SHOWING ERROR
       if (modal) modal.hide();
-      
-      // Hide loader
       hideLoader();
-      
-      // Then show error
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.innerHTML = 'Submit';
+      }
       displayError(result.message || 'Failed to update progress');
     }
   } catch (error) {
     console.error('Error:', error);
-    
-    // CLOSE MODAL FIRST BEFORE SHOWING ERROR
     if (modal) modal.hide();
-    
-    // Hide loader
     hideLoader();
-    
-    // Then show error
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.innerHTML = 'Submit';
+    }
     displayError('Network error. Please try again.');
   }
 }
 
-
-  // Initialize on page load
-  document.addEventListener('DOMContentLoaded', function() {
-    initProfileModal();
-    initProfileMenu();
-    
-    // Add submit button listener
-    const submitButton = document.getElementById('submitButton');
-    if (submitButton) {
-      submitButton.addEventListener('click', handleSubmit);
-    }
-    
-    // Add modal hidden listener
-    const modalElement = document.getElementById('imageModal');
-    if (modalElement) {
-      modalElement.addEventListener('hidden.bs.modal', function() {
-        // No rotation to restart since we don't have image rotation on start page
-      });
-    }
-  });
-  </script>
+// ===== HISTORY FUNCTIONS =====
+async function loadHistoryData() {
+  console.log('🔍 Loading history data at', new Date().toLocaleTimeString());
   
-  <script>
-    // History Modal Functionality
-  document.addEventListener('DOMContentLoaded', function() {
-    // Initialize history modal event listener
-    const historyModal = document.getElementById('historyModal');
-    if (historyModal) {
-      historyModal.addEventListener('show.bs.modal', function() {
-        loadHistoryData();
-      });
-    }
-    
-    // Tab switching
-    document.querySelectorAll('#historyTabs .nav-link').forEach(tab => {
-      tab.addEventListener('click', function(e) {
-        e.preventDefault();
-        // Update active tab
-        document.querySelectorAll('#historyTabs .nav-link').forEach(t => t.classList.remove('active'));
-        this.classList.add('active');
-        // Filter cards
-        filterHistoryCards(this.dataset.status);
-      });
-    });
-    
-    // Attach submit all button listener
-    const submitAllBtn = document.getElementById('history-submit-all-button');
-    if (submitAllBtn) {
-      submitAllBtn.addEventListener('click', submitAllHistoryOptimizations);
-    }
-    
-    // Remove the "In Development" badge from history button
-    const historyBadge = document.querySelector('.history-badge');
-    if (historyBadge) {
-      historyBadge.textContent = 'Records';
-      historyBadge.style.background = 'var(--brand-coral)';
-    }
-  });
+  const loader = document.getElementById('historyLoader');
+  const container = document.getElementById('history-cards-container');
+  const noDataMsg = document.getElementById('history-no-data');
+  const submitContainer = document.getElementById('history-submit-container');
   
-  // Load history data from server
-  async function loadHistoryData() {
-    const loader = document.getElementById('historyLoader');
-    const container = document.getElementById('history-cards-container');
-    const noDataMsg = document.getElementById('history-no-data');
-    const submitContainer = document.getElementById('history-submit-container');
-    
-    if (!loader || !container || !noDataMsg || !submitContainer) {
-      console.error('Required DOM elements not found');
-      return;
-    }
-    
-    loader.style.display = 'block';
-    container.innerHTML = '';
-    noDataMsg.style.display = 'none';
-    submitContainer.style.display = 'none';
-    
-    try {
-      const response = await fetch('/api/start-page/history');
-      const data = await response.json();
-      
-      loader.style.display = 'none';
-      
-      if (data.success && data.optimizations && data.optimizations.length > 0) {
-        // Sort optimizations: frozen first, then pending, then completed
-        const sortedOptimizations = [...data.optimizations].sort((a, b) => {
-          const statusOrder = { 'frozen': 1, 'pending': 2, 'completed': 3 };
-          return (statusOrder[a.status] || 4) - (statusOrder[b.status] || 4);
-        });
-        
-        // Generate HTML for each optimization
-        let cardsHtml = '';
-        let hasPendingOrFrozen = false;
-        
-        sortedOptimizations.forEach(opt => {
-          // Check if there are pending or frozen optimizations
-          if (opt.status === 'pending' || opt.status === 'frozen') {
-            hasPendingOrFrozen = true;
-          }
-          
-          cardsHtml += generateHistoryCard(opt, data.maxOptimizationCount);
-        });
-        
-        container.innerHTML = cardsHtml;
-        
-        // Show submit button if there are pending/frozen optimizations
-        if (hasPendingOrFrozen) {
-          submitContainer.style.display = 'block';
-        }
-        
-        // Initialize filter to show all cards
-        filterHistoryCards('all');
-        
-      } else {
-        // No data
-        noDataMsg.style.display = 'block';
-        container.appendChild(noDataMsg);
-      }
-    } catch (error) {
-      console.error('Error loading history:', error);
-      loader.style.display = 'none';
-      showHistoryMessage('Failed to load history data. Please try again.', 'danger');
-    }
+  if (!loader || !container || !noDataMsg || !submitContainer) {
+    console.error('Missing elements');
+    return;
   }
   
-  // Generate HTML for a history card
-  function generateHistoryCard(opt, maxOptimizationCount) {
-    const status = opt.status;
-    let statusClass = '';
-    let statusText = '';
-    
-    switch(status) {
-      case 'completed':
-        statusClass = 'status-completed';
-        statusText = 'Completed';
-        break;
-      case 'pending':
-        statusClass = 'status-pending';
-        statusText = 'Pending';
-        break;
-      case 'frozen':
-        statusClass = 'status-frozen';
-        statusText = 'Frozen';
-        break;
-      default:
-        statusClass = 'status-pending';
-        statusText = 'Pending';
-    }
-    
-    // Format date
-    const submissionDate = opt.submissionDate ? new Date(opt.submissionDate) : new Date();
-    const formattedDate = submissionDate.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+  loader.style.display = 'block';
+  container.innerHTML = '';
+  noDataMsg.style.display = 'none';
+  submitContainer.style.display = 'none';
+  
+  document.querySelectorAll('#historyTabs .nav-link').forEach(t => t.classList.remove('active'));
+  const allTab = document.querySelector('#historyTabs .nav-link[data-status="all"]');
+  if (allTab) allTab.classList.add('active');
+  
+  try {
+    const url = `/api/start-page/history?_=${Date.now()}&r=${Math.floor(Math.random() * 1000000)}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+      cache: 'no-store'
     });
     
-    return `
-      <div class="col-12 col-md-6 col-lg-4 history-card-wrapper" data-status="${status === 'frozen' ? 'pending' : status}">
-        <div class="history-card">
-          <span class="status-badge ${statusClass}">${statusText}</span>
-          
-          ${status === 'pending' || status === 'frozen' ? `
-            <button class="btn submit-btn-inline" onclick="submitSingleOptimization('${opt._id}')" style="position: absolute; bottom: 15px; right: 15px;">
-              Submit
-            </button>
-          ` : ''}
-          
-          <div class="d-flex align-items-start mb-3">
-            <img src="${opt.selectedImage || '/images/default-product.jpg'}" alt="${opt.imageName || 'Product'}" class="card-image" onerror="this.src='/images/placeholder.jpg'">
-            <div>
-              <h6 class="fw-bold mb-1">${opt.imageName || 'Unknown Product'}</h6>
-              <p class="mb-0 small">USDC: <span class="amount-text">${parseFloat(opt.usdcAmount || 0).toFixed(2)}</span></p>
-              <p class="mb-0 small text-muted">${formattedDate}</p>
-            </div>
+    const data = await response.json();
+    loader.style.display = 'none';
+    
+    if (data.success && data.optimizations && data.optimizations.length > 0) {
+      const sortedOptimizations = [...data.optimizations].sort((a, b) => {
+        const statusOrder = { 'frozen': 1, 'pending': 2, 'completed': 3 };
+        return (statusOrder[a.status] || 4) - (statusOrder[b.status] || 4);
+      });
+      
+      let cardsHtml = '';
+      let hasPendingOrFrozen = false;
+      
+      sortedOptimizations.forEach(opt => {
+        if (opt.status === 'pending' || opt.status === 'frozen') hasPendingOrFrozen = true;
+        cardsHtml += generateHistoryCard(opt, data.maxOptimizationCount);
+      });
+      
+      container.innerHTML = cardsHtml;
+      submitContainer.style.display = hasPendingOrFrozen ? 'block' : 'none';
+      filterHistoryCards('all');
+    } else {
+      noDataMsg.style.display = 'block';
+    }
+  } catch (error) {
+    console.error('❌ Error loading history:', error);
+    loader.style.display = 'none';
+    noDataMsg.style.display = 'block';
+    const messageOverlay = document.getElementById('historyMessageOverlay');
+    if (messageOverlay) {
+      messageOverlay.className = 'alert alert-danger';
+      messageOverlay.innerHTML = 'Failed to load history data. Please try again.';
+      messageOverlay.style.display = 'block';
+      setTimeout(() => { messageOverlay.style.display = 'none'; }, 4000);
+    }
+  }
+}
+
+function generateHistoryCard(opt, maxOptimizationCount) {
+  const status = opt.status;
+  let statusClass = '';
+  let statusText = '';
+  
+  switch(status) {
+    case 'completed': statusClass = 'status-completed'; statusText = 'Completed'; break;
+    case 'pending':   statusClass = 'status-pending';   statusText = 'Pending';   break;
+    case 'frozen':    statusClass = 'status-frozen';    statusText = 'Frozen';    break;
+    default:          statusClass = 'status-pending';   statusText = 'Pending';
+  }
+  
+  const submissionDate = opt.submissionDate ? new Date(opt.submissionDate) : new Date();
+  const formattedDate = submissionDate.toLocaleDateString('en-US', {
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+  
+  return `
+    <div class="col-12 col-md-6 col-lg-4 history-card-wrapper" data-status="${status === 'frozen' ? 'pending' : status}" data-id="${opt._id}">
+      <div class="history-card">
+        <span class="status-badge ${statusClass}">${statusText}</span>
+        ${status === 'pending' || status === 'frozen' ? `
+          <button class="btn submit-btn-inline" onclick="submitSingleOptimization('${opt._id}', this)" style="position: absolute; bottom: 15px; right: 15px;">
+            Submit
+          </button>
+        ` : ''}
+        <div class="d-flex align-items-start mb-3">
+          <img src="${opt.selectedImage || '/images/default-product.jpg'}" alt="${opt.imageName || 'Product'}" class="card-image" onerror="this.src='/images/placeholder.jpg'">
+          <div>
+            <h6 class="fw-bold mb-1">${opt.imageName || 'Unknown Product'}</h6>
+            <p class="mb-0 small">USDC: <span class="amount-text">${parseFloat(opt.usdcAmount || 0).toFixed(2)}</span></p>
+            <p class="mb-0 small text-muted">${formattedDate}</p>
           </div>
-          
-          <div class="card-footer-stats">
-            <div class="stat-item">
-              <div class="stat-label">Total Amount</div>
-              <div class="stat-value">USDC ${parseFloat(opt.usdcAmount || 0).toFixed(2)}</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-label">Commission</div>
-              <div class="stat-value">USDC ${parseFloat(opt.profitAmount || 0).toFixed(2)}</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-label">Task Progress</div>
-              <div class="stat-value">${opt.optimizationCount || 0}/${maxOptimizationCount || 40}</div>
-            </div>
+        </div>
+        <div class="card-footer-stats">
+          <div class="stat-item">
+            <div class="stat-label">Total Amount</div>
+            <div class="stat-value">USDC ${parseFloat(opt.usdcAmount || 0).toFixed(2)}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Commission</div>
+            <div class="stat-value">USDC ${parseFloat(opt.profitAmount || 0).toFixed(2)}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Task Progress</div>
+            <div class="stat-value">${opt.optimizationCount || 0}/${maxOptimizationCount || 40}</div>
           </div>
         </div>
       </div>
-    `;
-  }
+    </div>
+  `;
+}
+
+function filterHistoryCards(status) {
+  const cards = document.querySelectorAll('.history-card-wrapper');
+  const noDataMsg = document.getElementById('history-no-data');
+  let visibleCount = 0;
   
-  // Filter history cards by status
-  function filterHistoryCards(status) {
-    const cards = document.querySelectorAll('.history-card-wrapper');
-    const noDataMsg = document.getElementById('history-no-data');
-    
-    if (!cards.length) return;
-    
-    let visibleCount = 0;
-    
-    cards.forEach(card => {
-      const cardStatus = card.dataset.status;
-      
-      if (status === 'all' || cardStatus === status) {
-        card.style.display = 'block';
-        visibleCount++;
-      } else {
-        card.style.display = 'none';
-      }
+  cards.forEach(card => {
+    const cardStatus = card.dataset.status;
+    if (status === 'all' || cardStatus === status) {
+      card.style.display = 'block';
+      visibleCount++;
+    } else {
+      card.style.display = 'none';
+    }
+  });
+  
+  if (noDataMsg) noDataMsg.style.display = visibleCount === 0 ? 'block' : 'none';
+}
+
+async function submitAllHistoryOptimizations() {
+  const submitBtn = document.getElementById('history-submit-all-button');
+  if (!submitBtn) return;
+  
+  const originalText = submitBtn.innerHTML;
+  submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+  submitBtn.disabled = true;
+  showHistoryMessage('Processing your Promotions...', 'info');
+  
+  try {
+    const response = await fetch('/api/start-page/submit-history-optimizations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
     });
     
-    // Show/hide no data message based on visible cards
-    if (noDataMsg) {
-      if (visibleCount === 0) {
-        // Create temporary no data message if needed
-        let tempNoData = document.getElementById('history-no-data-temp');
-        if (!tempNoData) {
-          tempNoData = noDataMsg.cloneNode(true);
-          tempNoData.id = 'history-no-data-temp';
-          tempNoData.style.display = 'block';
-          document.getElementById('history-cards-container').appendChild(tempNoData);
-        }
-      } else {
-        // Remove temporary no data message if it exists
-        const tempNoData = document.getElementById('history-no-data-temp');
-        if (tempNoData) {
-          tempNoData.remove();
-        }
-      }
+    const data = await response.json();
+    
+    if (data.redirect) {
+      window.location.href = data.redirect;
+      return;
     }
-  }
-  
-  // Submit all optimizations from history modal
-  async function submitAllHistoryOptimizations() {
-    const submitBtn = document.getElementById('history-submit-all-button');
-    if (!submitBtn) return;
     
-    const originalText = submitBtn.innerHTML;
-    
-    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
-    submitBtn.disabled = true;
-    
-    showHistoryMessage('Processing your Promotions...', 'info');
-    
-    try {
-      const response = await fetch('/api/start-page/submit-history-optimizations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      
-      const data = await response.json();
-      
-      // Handle redirect
-      if (data.redirect) {
-        window.location.href = data.redirect;
-        return;
-      }
-      
-      if (data.success) {
-        showHistoryMessage('✓ ' + data.message, 'success');
-        
-        // Update balance displays on main page
-        if (data.updatedTotalBalance) {
-          const balanceElement = document.querySelector('.balance-amount');
-          if (balanceElement) {
-            balanceElement.innerHTML = `${parseFloat(data.updatedTotalBalance).toFixed(2)} <span>USD</span>`;
-          }
-        }
-        
-        if (data.updatedTodaysProfit) {
-          const commissionElement = document.querySelector('.commission-amount');
-          if (commissionElement) {
-            commissionElement.innerHTML = `${parseFloat(data.updatedTodaysProfit).toFixed(2)} <span>USD</span>`;
-          }
-        }
-        
-        // Show success message and reload after 1.5 seconds
-        showHistoryMessage('✓ Optimizations submitted successfully! Reloading...', 'success');
-        
-        // Reload the page after submission
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
-        
-      } else {
-        showHistoryMessage('✗ ' + data.message, 'danger');
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-      }
-    } catch (error) {
-      console.error('Error submitting Promotions:', error);
-      showHistoryMessage('Network error. Please try again.', 'danger');
+    if (data.success) {
+      await refreshUIFromBackend();
+      showHistoryMessage('✓ ' + data.message, 'success');
+      showSuccessMessage('All promotions completed!');
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+      setTimeout(() => { loadHistoryData(); }, 800);
+    } else {
+      showHistoryMessage('✗ ' + data.message, 'danger');
       submitBtn.innerHTML = originalText;
       submitBtn.disabled = false;
     }
+  } catch (error) {
+    console.error('Error submitting Promotions:', error);
+    showHistoryMessage('Network error. Please try again.', 'danger');
+    submitBtn.innerHTML = originalText;
+    submitBtn.disabled = false;
   }
-  
-  // Submit single Promotion
-  async function submitSingleOptimization(optimizationId) {
-    showHistoryMessage('Processing Promotion...', 'info');
-    
-    try {
-      const response = await fetch('/api/start-page/submit-history-optimizations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      
-      const data = await response.json();
-      
-      if (data.redirect) {
-        window.location.href = data.redirect;
-        return;
-      }
-      
-      if (data.success) {
-        showHistoryMessage('✓ Promotion completed successfully! Reloading...', 'success');
-        
-        // Update balance displays
-        if (data.updatedTotalBalance) {
-          const balanceElement = document.querySelector('.balance-amount');
-          if (balanceElement) {
-            balanceElement.innerHTML = `${parseFloat(data.updatedTotalBalance).toFixed(2)} <span>USD</span>`;
-          }
-        }
-        
-        if (data.updatedTodaysProfit) {
-          const commissionElement = document.querySelector('.commission-amount');
-          if (commissionElement) {
-            // FIX: Use the updated value directly
-            commissionElement.innerHTML = `${parseFloat(data.updatedTodaysProfit).toFixed(2)} <span>USD</span>`;
-          }
-        }
-        
-        // Reload the page after submission
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
-        
-      } else {
-        showHistoryMessage('✗ ' + data.message, 'danger');
-      }
-    } catch (error) {
-      console.error('Error submitting Promotion:', error);
-      showHistoryMessage('Network error. Please try again.', 'danger');
-    }
-  }
-  
-  // Show message overlay inside modal
-  function showHistoryMessage(message, type) {
-    const overlay = document.getElementById('historyMessageOverlay');
-    if (!overlay) return;
-    
-    overlay.className = `alert alert-${type}`;
-    overlay.innerHTML = message;
-    overlay.style.display = 'block';
-    
-    setTimeout(() => {
-      overlay.style.display = 'none';
-    }, 4000);
-  }
-
-    // ===== LOADER FUNCTIONS =====
-  function showLoader(message = 'Processing...') {
-    const loader = document.getElementById('loaderOverlay');
-    const loaderText = loader.querySelector('.loader-text');
-    if (loaderText) {
-      loaderText.innerHTML = message + '<small>Please wait</small>';
-    }
-    loader.classList.add('show');
-  }
-  
-  function hideLoader() {
-    const loader = document.getElementById('loaderOverlay');
-    loader.classList.remove('show');
-  }
-
-  // ===== ERROR HANDLING FUNCTIONS =====
-  function showError(message) {
-    const errorOverlay = document.getElementById('errorOverlay');
-    const errorMessage = document.getElementById('errorMessage');
-    
-    if (errorOverlay && errorMessage) {
-      errorMessage.textContent = message;
-      errorOverlay.classList.add('show');
-      
-      // Auto hide after 5 seconds
-      setTimeout(() => {
-        closeErrorOverlay();
-      }, 5000);
-    } else {
-      console.error('Error overlay not found:', message);
-    }
-  }
-  
-  function closeErrorOverlay() {
-    const errorOverlay = document.getElementById('errorOverlay');
-    if (errorOverlay) {
-      errorOverlay.classList.remove('show');
-    }
-  }
-  
-  // Define displayError function
-  function displayError(errorMessage) {
-    hideLoader(); // Hide loader first
-    showError(errorMessage); // Then show error
-    console.log('Error:', errorMessage);
-  }
-  
-  // Modified showOverlay function - with loader
-  async function showOverlay() {
-    // Show loader first
-    showLoader('Creating promotion...');
-    
-    // Get VIP level from EJS
-    const vipLevel = "<%= vipLevel || 'VIP1' %>";
-    const username = "<%= username || '' %>";
-    
-    // Generate random task from brands
-    const randomIndex = Math.floor(Math.random() * images.length);
-    const selectedImage = images[randomIndex];
-    const selectedName = names[randomIndex];
-    const selectedUSDC = vipLevel === "VIP1" 
-      ? usdcAmountsVIP1[randomIndex % usdcAmountsVIP1.length] 
-      : usdcAmounts[randomIndex % usdcAmounts.length];
-    
-    const profitRate = getProfitRate(vipLevel);
-    const profit = (selectedUSDC * profitRate).toFixed(2);
-    
-    // Get current Promotion count
-    const optimizationCountElement = document.querySelector('.optimization-count-display span:first-child');
-    let currentCount = parseInt(optimizationCountElement ? optimizationCountElement.textContent : "<%= optimizationCount || 0 %>");
-    const maxCount = parseInt("<%= maxOptimizationCount || 40 %>");
-    const updatedCount = Math.min(currentCount + 1, maxCount);
-    
-    try {
-      const response = await fetch('/api/optimizations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username,
-          selectedImage,
-          imageName: selectedName,
-          usdcAmount: selectedUSDC,
-          profitAmount: profit,
-          optimizationCount: updatedCount,
-          status: 'pending'
-        })
-      });
-      
-      const result = await response.json();
-      
-      // Hide loader regardless of result
-      hideLoader();
-      
-      if (!result.success) {
-        displayError(result.message || 'Failed to save Promotion');
-      } else {
-        // Show the image modal directly
-        displayImageModal(selectedImage, selectedName, selectedUSDC, profit);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      hideLoader();
-      displayError('An error occurred. Please try again.');
-    }
-  }
-  
-  // Modified handleSubmit function - with loader
-  async function handleSubmit() {
-    // Show loader
-    showLoader('Submitting promotion...');
-    
-    const username = "<%= username || '' %>";
-    const profitAmount = parseFloat(document.getElementById("profitAmount").textContent) || 0;
-    const usdcAmount = parseFloat(document.getElementById("usdcAmount").textContent) || 0;
-    
-    try {
-      const response = await fetch('/updateProgress', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username,
-          todaysProfit: profitAmount,
-          totalBalance: profitAmount
-        })
-      });
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        // Update optimization count in UI
-        const countElement = document.querySelector('.optimization-count-display span:first-child');
-        if (countElement) {
-          let current = parseInt(countElement.textContent) || 0;
-          countElement.textContent = current + 1;
-        }
-        
-        // Update the count badge
-        const badgeElement = document.querySelector('.optimization-count-badge');
-        if (badgeElement) {
-          let badgeText = badgeElement.textContent;
-          let matches = badgeText.match(/(\d+)\/(\d+)/);
-          if (matches) {
-            let current = parseInt(matches[1]) || 0;
-            let max = parseInt(matches[2]) || 40;
-            badgeElement.textContent = `${current + 1}/${max}`;
-          }
-        }
-        
-        // Close modal
-        const modalElement = document.getElementById('imageModal');
-        const modal = bootstrap.Modal.getInstance(modalElement);
-        if (modal) modal.hide();
-        
-        // Hide loader
-        hideLoader();
-        
-        // Show success and reload
-        setTimeout(() => window.location.reload(), 500);
-      } else {
-        hideLoader();
-        displayError(result.message || 'Failed to update progress');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      hideLoader();
-      displayError('Network error. Please try again.');
-    }
-  }
-  
-  // Modified displayImageModal function
-  function displayImageModal(selectedImage, selectedName, selectedUSDC, profit) {
-    document.getElementById("modalImage").src = selectedImage;
-    document.getElementById("imageName").innerText = selectedName;
-    document.getElementById("usdcAmount").innerText = selectedUSDC;
-    document.getElementById("totalUsdcAmount").innerText = selectedUSDC;
-    document.getElementById("profitAmount").textContent = profit;
-    
-    const taskCode = Array.from({ length: 30 }, () => Math.floor(Math.random() * 10)).join('');
-    document.getElementById("taskCode").innerText = taskCode;
-    
-    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
-    modal.show();
-  }
-  
-  // Add click outside to close error overlay
-  document.addEventListener('DOMContentLoaded', function() {
-    // Add click event to close error overlay when clicking outside
-    document.addEventListener('click', function(event) {
-      const errorOverlay = document.getElementById('errorOverlay');
-      if (errorOverlay && errorOverlay.classList.contains('show')) {
-        if (!errorOverlay.contains(event.target)) {
-          closeErrorOverlay();
-        }
-      }
-    });
-  });
-
-  // Add this function to handle logout
-function logout() {
-    if (confirm('Are you sure you want to logout?')) {
-        fetch('/api/logout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.href = '/?auth=login&message=' + encodeURIComponent('Logged out successfully');
-            } else {
-                alert('Logout failed. Please try again.');
-            }
-        })
-        .catch(error => {
-            console.error('Logout error:', error);
-            alert('Logout failed. Please try again.');
-        });
-    }
 }
-  </script>
+
+async function submitSingleOptimization(optimizationId, buttonElement) {
+  const button = buttonElement;
+  const originalText = button.innerHTML;
+  button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+  button.disabled = true;
+  showHistoryMessage('Processing Promotion...', 'info');
+  
+  try {
+    const response = await fetch('/api/start-page/submit-history-optimizations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ optimizationId })
+    });
+    
+    const data = await response.json();
+    
+    if (data.redirect) {
+      window.location.href = data.redirect;
+      return;
+    }
+    
+    if (data.success) {
+      await refreshUIFromBackend();
+      showHistoryMessage('✓ Promotion completed successfully!', 'success');
+      showSuccessMessage('Promotion completed!');
+      setTimeout(() => { loadHistoryData(); }, 800);
+    } else {
+      showHistoryMessage('✗ ' + data.message, 'danger');
+      button.innerHTML = originalText;
+      button.disabled = false;
+    }
+  } catch (error) {
+    console.error('Error submitting Promotion:', error);
+    showHistoryMessage('Network error. Please try again.', 'danger');
+    button.innerHTML = originalText;
+    button.disabled = false;
+  }
+}
+
+function manualRefreshHistory() {
+  console.log('🔄 Manual refresh triggered');
+  loadHistoryData();
+  showHistoryMessage('Refreshing data...', 'info');
+}
+
+// ===== LOGOUT =====
+function logout() {
+  if (confirm('Are you sure you want to logout?')) {
+    fetch('/api/logout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.href = '/?auth=login&message=' + encodeURIComponent('Logged out successfully');
+      } else {
+        alert('Logout failed. Please try again.');
+      }
+    })
+    .catch(error => {
+      console.error('Logout error:', error);
+      alert('Logout failed. Please try again.');
+    });
+  }
+}
+
+// ===== HISTORY MODAL SETUP =====
+function setupHistoryModal() {
+  const historyModal = document.getElementById('historyModal');
+  if (!historyModal) return;
+  
+  historyModal.removeEventListener('show.bs.modal', handleModalShow);
+  historyModal.removeEventListener('shown.bs.modal', handleModalShown);
+  historyModal.removeEventListener('hidden.bs.modal', handleModalHidden);
+  historyModal.addEventListener('show.bs.modal', handleModalShow);
+  historyModal.addEventListener('shown.bs.modal', handleModalShown);
+  historyModal.addEventListener('hidden.bs.modal', handleModalHidden);
+  
+  document.querySelectorAll('#historyTabs .nav-link').forEach(tab => {
+    tab.removeEventListener('click', handleTabClick);
+    tab.addEventListener('click', handleTabClick);
+  });
+  
+  const submitAllBtn = document.getElementById('history-submit-all-button');
+  if (submitAllBtn) {
+    submitAllBtn.removeEventListener('click', submitAllHistoryOptimizations);
+    submitAllBtn.addEventListener('click', submitAllHistoryOptimizations);
+  }
+}
+
+function handleModalShow() {
+  setTimeout(() => { loadHistoryData(); }, 100);
+}
+
+function handleModalShown() {
+  const container = document.getElementById('history-cards-container');
+  if (container && container.children.length === 0) loadHistoryData();
+}
+
+function handleModalHidden() {
+  console.log('History modal closed');
+}
+
+function handleTabClick(e) {
+  e.preventDefault();
+  document.querySelectorAll('#historyTabs .nav-link').forEach(t => t.classList.remove('active'));
+  this.classList.add('active');
+  filterHistoryCards(this.dataset.status);
+}
+
+// ===== INITIALIZATION =====
+document.addEventListener('DOMContentLoaded', function() {
+  initProfileModal();
+  initProfileMenu();
+  
+  const submitButton = document.getElementById('submitButton');
+  if (submitButton) submitButton.addEventListener('click', handleSubmit);
+  
+  setupHistoryModal();
+  
+  document.addEventListener('click', function(event) {
+    const errorOverlay = document.getElementById('errorOverlay');
+    if (errorOverlay && errorOverlay.classList.contains('show')) {
+      if (!errorOverlay.contains(event.target)) closeErrorOverlay();
+    }
+  });
+});
+</script>
 </body>
 </html>

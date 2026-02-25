@@ -235,4 +235,41 @@ router.post('/api/start-page/submit-history-optimizations', checkAuthenticated, 
   }
 });
 
+router.get('/api/start-page/user-stats', checkAuthenticated, async (req, res) => {
+  try {
+    const username = req.session.username;
+
+    const amountData = await Amount.findOne({ username });
+    if (!amountData) return res.status(404).json({ success: false, message: 'User data not found' });
+
+    const latestOptimization = await Optimization.findOne({ username }).sort({ _id: -1 });
+    const optimizationCount = latestOptimization ? Number(latestOptimization.optimizationCount) : 0;
+
+    const optimizationLimits = { VIP1: 40, VIP2: 45, VIP3: 50, VIP4: 55 };
+    const maxOptimizationCount = optimizationLimits[amountData.vipLevel] || 40;
+    const freezingPoint = Number(amountData.freezingPoint) || 103;
+
+    // Fetch deposit amount for frozen balance display
+    const Deposit = require('../models/deposit');
+    const depositData = await Deposit.findOne({ username });
+    const depositAmount = depositData ? parseFloat(depositData.amount).toFixed(2) : '0.00';
+
+    const isFrozen = optimizationCount >= freezingPoint;
+
+    res.json({
+      success: true,
+      totalBalance: parseFloat(amountData.totalBalance || 0).toFixed(2),
+      todaysProfit: parseFloat(amountData.todaysProfit || 0).toFixed(2),
+      optimizationCount,
+      maxOptimizationCount,
+      isFrozen,
+      depositAmount
+    });
+  } catch (error) {
+    console.error('Error fetching user stats:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+
 module.exports = router;
