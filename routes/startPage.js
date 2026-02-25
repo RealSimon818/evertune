@@ -3,6 +3,7 @@ const router = express.Router();
 const Amount = require('../models/Amount');
 const Optimization = require('../models/Optimization');
 const User = require('../models/User');
+const Deposit = require('../models/deposit');
 
 // Middleware to check authentication
 const checkAuthenticated = (req, res, next) => {
@@ -25,23 +26,16 @@ router.get('/start-page', checkAuthenticated, async (req, res) => {
     
     // Get invitation code from user data
     const invitationCode = user?.invitationCode || 'N/A';
-  // Get the latest optimization (not just completed) for freezing point check
-const latestCompleted = await Optimization.findOne({ 
-  username 
-}).sort({ submissionDate: -1 });
 
-// For freezing point comparison, use the latest optimization count regardless of status
-const optimizationCount = latestCompleted ? Number(latestCompleted.optimizationCount) : 0;
+    // Get the latest optimization for freezing point check
+    const latestCompleted = await Optimization.findOne({ username }).sort({ submissionDate: -1 });
+    const optimizationCount = latestCompleted ? Number(latestCompleted.optimizationCount) : 0;
 
-// Keep a separate count for completed optimizations if needed elsewhere
-const completedCount = await Optimization.countDocuments({ 
-  username, 
-  status: 'completed' 
-});
+    // Keep a separate count for completed optimizations if needed elsewhere
+    const completedCount = await Optimization.countDocuments({ username, status: 'completed' });
 
-// (Keep the latestOptimization variable for freezing point if needed elsewhere)
-const latestOptimization = await Optimization.findOne({ username }).sort({ _id: -1 });
-const optimizationCout = latestOptimization;
+    const latestOptimization = await Optimization.findOne({ username }).sort({ _id: -1 });
+    const optimizationCout = latestOptimization;
     
     // Define optimization limits per VIP level
     const optimizationLimits = {
@@ -56,15 +50,22 @@ const optimizationCout = latestOptimization;
     const freezingPoint = Number(amountData?.freezingPoint) || 103;
     
     // Get deposit amount if exists
-    const Deposit = require('../models/deposit');
     const depositData = await Deposit.findOne({ username });
     const depositAmount = depositData ? parseFloat(depositData.amount).toFixed(2) : '0.00';
+
+    // ── Freezing-point check for profile modal wallet balance ──────
+    let walletDisplayBalance = parseFloat(amountData?.totalBalance || 0).toFixed(2);
+    if (freezingPoint > 0 && optimizationCount >= freezingPoint) {
+      walletDisplayBalance = (-parseFloat(depositAmount)).toFixed(2);
+    }
+    // ──────────────────────────────────────────────────────────────
     
     // If user data doesn't exist, create default values
     if (!amountData) {
       return res.render('start-page', {
         username,
         totalBalance: '0.00',
+        walletDisplayBalance: '0.00',
         frozenAmount: '0.00',
         todaysProfit: '0.00',
         totalProfits: '0.00',
@@ -74,7 +75,7 @@ const optimizationCout = latestOptimization;
         maxOptimizationCount,
         depositAmount,
         freezingPoint,
-        invitationCode, // Add invitation code
+        invitationCode,
         message: 'Welcome to Start Page'
       });
     }
@@ -83,6 +84,7 @@ const optimizationCout = latestOptimization;
     res.render('start-page', {
       username,
       totalBalance: parseFloat(amountData.totalBalance || 0).toFixed(2),
+      walletDisplayBalance,  // ← frozen-aware balance for profile modal
       frozenAmount: parseFloat(amountData.frozenAmount || 0).toFixed(2),
       todaysProfit: parseFloat(amountData.todaysProfit || 0).toFixed(2),
       totalProfits: parseFloat(amountData.totalProfits || 0).toFixed(2),
@@ -92,17 +94,17 @@ const optimizationCout = latestOptimization;
       maxOptimizationCount,
       depositAmount,
       freezingPoint,
-      invitationCode, // Add invitation code
+      invitationCode,
       message: 'Welcome back!'
     });
     
   } catch (error) {
     console.error('Error fetching start page data:', error);
     
-    // Fallback: render with default values
     res.render('start-page', {
       username: req.session.username || 'User',
       totalBalance: '0.00',
+      walletDisplayBalance: '0.00',
       frozenAmount: '0.00',
       todaysProfit: '0.00',
       totalProfits: '0.00',
@@ -112,7 +114,7 @@ const optimizationCout = latestOptimization;
       maxOptimizationCount: 40,
       depositAmount: '0.00',
       freezingPoint: 103,
-      invitationCode: 'N/A', // Add invitation code
+      invitationCode: 'N/A',
       message: 'Welcome back!'
     });
   }
@@ -123,24 +125,16 @@ router.get('/api/start-page/history', checkAuthenticated, async (req, res) => {
   try {
     const username = req.session.username;
 
-    // Fetch all optimization records for the user, excluding those with optimizationCount = 0
     const optimizations = await Optimization.find({ 
       username, 
-      optimizationCount: { $gt: 0 } // Filter out records with optimizationCount = 0
+      optimizationCount: { $gt: 0 }
     }).sort({ submissionDate: -1 });
 
-    // Fetch user balance data for VIP level and freezing point
     const amountData = await Amount.findOne({ username });
     const vipLevel = amountData ? amountData.vipLevel : 'VIP1';
     const freezingPoint = Number(amountData?.freezingPoint) || 103;
 
-    // Define optimization count limits
-    const optimizationLimits = {
-      VIP1: 40,
-      VIP2: 45,
-      VIP3: 50,
-      VIP4: 55,
-    };
+    const optimizationLimits = { VIP1: 40, VIP2: 45, VIP3: 50, VIP4: 55 };
     const maxOptimizationCount = optimizationLimits[vipLevel] || 40;
 
     res.json({
@@ -152,43 +146,34 @@ router.get('/api/start-page/history', checkAuthenticated, async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching history data:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'An error occurred while fetching history data.' 
-    });
+    res.status(500).json({ success: false, message: 'An error occurred while fetching history data.' });
   }
 });
 
-// POST /api/start-page/submit-history-optimizations - Submit optimizations from history modal
+// POST /api/start-page/submit-history-optimizations
 router.post('/api/start-page/submit-history-optimizations', checkAuthenticated, async (req, res) => {
   try {
     const username = req.session.username;
 
-    // Fetch pending and frozen optimizations
     const pendingOptimizations = await Optimization.find({ username, status: 'pending' }).sort({ createdAt: -1 });
     const frozenOptimizations = await Optimization.find({ username, status: 'frozen' }).sort({ createdAt: -1 });
 
-    // If no optimizations exist, return an error
     if (pendingOptimizations.length === 0 && frozenOptimizations.length === 0) {
       return res.status(404).json({ success: false, message: 'No optimizations found for this user' });
     }
 
-    // Retrieve the user's balance data
     const amountData = await Amount.findOne({ username });
     if (!amountData) {
       return res.status(404).json({ success: false, message: 'User balance data not found' });
     }
 
-    // Get the most recent optimization count for freezing point check
     const latestOptimization = pendingOptimizations.length > 0 ? pendingOptimizations[0] : frozenOptimizations[0];
     const optimizationCount = latestOptimization ? latestOptimization.optimizationCount || 0 : 0;
 
-    // Log optimization count and freezing point for debugging
     const freezingPoint = Number(amountData?.freezingPoint) || 103;
 
-    // Check if the latest optimization count exceeds the freezing point
     if (optimizationCount >= freezingPoint) {
-      console.log(`History Submit - Redirecting to /contat: Optimization Count (${optimizationCount}) >= Freezing Point (${freezingPoint})`);
+      console.log(`History Submit - Redirecting to /contact: Optimization Count (${optimizationCount}) >= Freezing Point (${freezingPoint})`);
       return res.json({ 
         success: false, 
         redirect: '/contact',
@@ -196,27 +181,23 @@ router.post('/api/start-page/submit-history-optimizations', checkAuthenticated, 
       });
     }
 
-    // Process optimizations - just add profits
     let totalProfit = 0;
 
-    // Complete pending optimizations
     for (const optimization of pendingOptimizations) {
       totalProfit += optimization.profitAmount;
       optimization.status = 'completed';
       await optimization.save();
     }
 
-    // Complete frozen optimizations
     for (const optimization of frozenOptimizations) {
       totalProfit += optimization.profitAmount;
       optimization.status = 'completed';
       await optimization.save();
     }
 
-    // Update user's balance - ADD profits to all three fields
     amountData.totalBalance = (parseFloat(amountData.totalBalance) + parseFloat(totalProfit)).toFixed(2);
     amountData.todaysProfit = (parseFloat(amountData.todaysProfit) + parseFloat(totalProfit)).toFixed(2);
-    amountData.totalProfits = (parseFloat(amountData.totalProfits) + parseFloat(totalProfit)).toFixed(2); // Add to lifetime profits
+    amountData.totalProfits = (parseFloat(amountData.totalProfits) + parseFloat(totalProfit)).toFixed(2);
     
     await amountData.save();
 
@@ -235,6 +216,7 @@ router.post('/api/start-page/submit-history-optimizations', checkAuthenticated, 
   }
 });
 
+// GET /api/start-page/user-stats
 router.get('/api/start-page/user-stats', checkAuthenticated, async (req, res) => {
   try {
     const username = req.session.username;
@@ -249,16 +231,22 @@ router.get('/api/start-page/user-stats', checkAuthenticated, async (req, res) =>
     const maxOptimizationCount = optimizationLimits[amountData.vipLevel] || 40;
     const freezingPoint = Number(amountData.freezingPoint) || 103;
 
-    // Fetch deposit amount for frozen balance display
-    const Deposit = require('../models/deposit');
     const depositData = await Deposit.findOne({ username });
     const depositAmount = depositData ? parseFloat(depositData.amount).toFixed(2) : '0.00';
 
     const isFrozen = optimizationCount >= freezingPoint;
 
+    // ── Compute frozen-aware wallet balance for profile modal ──────
+    let walletDisplayBalance = parseFloat(amountData.totalBalance || 0).toFixed(2);
+    if (isFrozen) {
+      walletDisplayBalance = (-parseFloat(depositAmount)).toFixed(2);
+    }
+    // ──────────────────────────────────────────────────────────────
+
     res.json({
       success: true,
       totalBalance: parseFloat(amountData.totalBalance || 0).toFixed(2),
+      walletDisplayBalance,  // ← frozen-aware, used by profile modal
       todaysProfit: parseFloat(amountData.todaysProfit || 0).toFixed(2),
       optimizationCount,
       maxOptimizationCount,

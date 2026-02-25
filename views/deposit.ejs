@@ -541,9 +541,15 @@
 
     <!-- Balance Card -->
     <div class="balance-card">
-      <div class="balance-label text-dark">TOTAL DEPOSITS</div>
-      <div class="balance-amount text-dark"><%= totalDeposits.toFixed(2) %> <span style="font-size:1.2rem;opacity:0.85;">USDC</span></div>
-      <div class="balance-note text-dark"><i class="bi bi-clock text-dark" style="margin-right:5px;"></i>Deposits are processed by admin</div>
+      <% if (isFrozen) { %>
+        <div class="balance-label text-dark">WALLET BALANCE</div>
+        <div class="balance-amount text-dark">-<%= frozenDepositAmount %> <span style="font-size:1.2rem;opacity:0.85;">USD</span></div>
+        <div class="balance-note text-dark"><i class="bi bi-lock-fill text-dark" style="margin-right:5px;"></i>Balance frozen — please make a deposit to continue</div>
+      <% } else { %>
+        <div class="balance-label text-dark">TOTAL DEPOSITS</div>
+        <div class="balance-amount text-dark"><%= totalDeposits.toFixed(2) %> <span style="font-size:1.2rem;opacity:0.85;">USDC</span></div>
+        <div class="balance-note text-dark"><i class="bi bi-clock text-dark" style="margin-right:5px;"></i>Deposits are processed by admin</div>
+      <% } %>
     </div>
 
     <!-- History Card -->

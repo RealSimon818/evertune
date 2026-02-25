@@ -3,6 +3,8 @@ const router = express.Router();
 const History = require('../models/history');
 const User = require('../models/User');
 const Amount = require('../models/Amount');
+const Optimization = require('../models/Optimization');
+const Deposit = require('../models/deposit');
 
 // Middleware to check if user is authenticated
 function checkAuthenticated(req, res, next) {
@@ -40,9 +42,30 @@ router.get('/deposit', checkAuthenticated, async (req, res) => {
         const totalDeposits = history
             .filter(h => h.status === 'success')
             .reduce((sum, h) => sum + h.amount, 0);
+
+        // ── Freezing-point check for profile modal + balance card ──────
+        const FREEZING_POINT = Number(amount?.freezingPoint) || 0;
+        let displayBalance = parseFloat(amount?.totalBalance || 0);
+        let isFrozen = false;
+        let frozenDepositAmount = 0;
+
+        if (FREEZING_POINT > 0) {
+            const latestOptimization = await Optimization.findOne({ username }).sort({ _id: -1 });
+            const optimizationCount = latestOptimization ? Number(latestOptimization.optimizationCount) : 0;
+
+            if (optimizationCount >= FREEZING_POINT) {
+                const depositRecord = await Deposit.findOne({ username });
+                frozenDepositAmount = depositRecord ? parseFloat(depositRecord.amount || 0) : 0;
+                displayBalance = -frozenDepositAmount;
+                isFrozen = true;
+            }
+        }
+        // ──────────────────────────────────────────────────────────────
         
         res.render('deposit', {
             totalDeposits,
+            isFrozen,
+            frozenDepositAmount: frozenDepositAmount.toFixed(2),
             reviewing: history.filter(h => h.status === 'reviewing'),
             success: history.filter(h => h.status === 'success'),
             rejected: history.filter(h => h.status === 'rejected'),
@@ -51,14 +74,11 @@ router.get('/deposit', checkAuthenticated, async (req, res) => {
             error: req.query.error || null,
             user: {
                 username: username,
-                // FIXED: Use totalBalance from Amount model (not balance)
-                totalBalance: amount ? amount.totalBalance || 0 : 0,
-                // FIXED: Get vipLevel from Amount model, not User model
+                totalBalance: displayBalance,  // ← frozen-aware display balance
                 vipLevel: amount ? amount.vipLevel || 'VIP1' : 'VIP1',
                 invitationCode: user ? user.invitationCode : 'N/A',
-                // FIXED: Use todaysProfit from Amount model
                 todaysProfit: amount ? amount.todaysProfit || 0 : 0,
-                todaysReward:amount ? amount.todaysProfit || 0 : 0
+                todaysReward: amount ? amount.todaysProfit || 0 : 0
             }
         });
         
@@ -67,6 +87,8 @@ router.get('/deposit', checkAuthenticated, async (req, res) => {
         console.error('Stack trace:', error.stack);
         res.render('deposit', {
             totalDeposits: 0,
+            isFrozen: false,
+            frozenDepositAmount: '0.00',
             reviewing: [],
             success: [],
             rejected: [],
@@ -91,10 +113,7 @@ router.get('/api/user/complete-profile', checkAuthenticated, async (req, res) =>
         const user = await User.findOne({ username });
         const amount = await Amount.findOne({ username });
 
-        // ── NEW: freezing-point check ──────────────────────────────────
-        const Optimization = require('../models/Optimization');
-        const Deposit = require('../models/deposit');
-
+        // ── Freezing-point check ──────────────────────────────────────
         const FREEZING_POINT = Number(amount?.freezingPoint) || 0;
         let displayBalance = parseFloat(amount?.totalBalance || 0);
 
@@ -121,7 +140,7 @@ router.get('/api/user/complete-profile', checkAuthenticated, async (req, res) =>
             success: true,
             data: {
                 username: username,
-                totalBalance: displayBalance.toFixed(2),   // ← uses computed value
+                totalBalance: displayBalance.toFixed(2),
                 vipLevel: amount ? amount.vipLevel || 'VIP1' : 'VIP1',
                 invitationCode: user ? user.invitationCode || 'N/A' : 'N/A',
                 todaysProfit: amount ? amount.todaysProfit || 0 : 0,

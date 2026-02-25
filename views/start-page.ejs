@@ -1730,7 +1730,7 @@
             </div>
             <div class="info-card">
               <div class="info-label">Wallet Balance</div>
-              <div class="info-value" id="user-wallet"><%= parseFloat(totalBalance || 0).toFixed(2) %> USD</div>
+              <div class="info-value" id="user-wallet"><%= walletDisplayBalance %> USD</div>
             </div>
             <div class="info-card">
               <div class="info-label">VIP Level</div>
@@ -2651,7 +2651,7 @@ async function refreshUIFromBackend() {
     const userReward = document.getElementById('user-reward');
     if (userReward) userReward.textContent = `${data.todaysProfit} USD`;
     const userWallet = document.getElementById('user-wallet');
-    if (userWallet) userWallet.textContent = `${data.totalBalance} USD`;
+    if (userWallet) userWallet.textContent = `${data.walletDisplayBalance || data.totalBalance} USD`;
 
     // Balance card - handles both frozen and normal states
     const balanceElement = document.querySelector('.balance-amount');
