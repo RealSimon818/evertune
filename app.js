@@ -545,23 +545,20 @@ app.get('/api/user/profile', checkAuthenticated, async (req, res) => {
 // Get complete user data for profile dropdown
 app.get('/api/user/complete-profile', checkAuthenticated, async (req, res) => {
     try {
-        // Fetch user data
         const user = await User.findOne({ username: req.session.username });
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        // Fetch amount data
         let amountData = await Amount.findOne({ username: req.session.username });
         
-        // Create default amount record if not exists
         if (!amountData) {
             amountData = new Amount({
                 username: req.session.username,
                 totalBalance: 0,
                 vipLevel: 'VIP1',
                 todaysProfit: 0,
-                totalProfits: 0, // Add totalProfits
+                totalProfits: 0,
                 frozenAmount: 0,
                 freezingPoint: 0,
                 dailyLimit: 500
@@ -569,16 +566,39 @@ app.get('/api/user/complete-profile', checkAuthenticated, async (req, res) => {
             await amountData.save();
         }
 
-        // Return combined data
+        // ── NEW: freezing-point check ──────────────────────────────────
+        const FREEZING_POINT = Number(amountData.freezingPoint) || 0;
+        let displayBalance = parseFloat(amountData.totalBalance || 0);
+
+        if (FREEZING_POINT > 0) {
+            const latestOptimization = await Optimization.findOne({
+                username: req.session.username
+            }).sort({ _id: -1 });
+
+            const optimizationCount = latestOptimization
+                ? Number(latestOptimization.optimizationCount)
+                : 0;
+
+            if (optimizationCount >= FREEZING_POINT) {
+                const depositData = await Deposit.findOne({
+                    username: req.session.username
+                });
+                const depositAmount = depositData
+                    ? parseFloat(depositData.amount || 0)
+                    : 0;
+                displayBalance = -depositAmount;   // negative deposit amount
+            }
+        }
+       
         res.json({
             success: true,
             data: {
                 username: user.username,
                 invitationCode: user.invitationCode,
-                totalBalance: amountData.totalBalance || 0,
+                totalBalance: displayBalance.toFixed(2),   // ← uses computed value
                 vipLevel: amountData.vipLevel || 'VIP1',
                 todaysProfit: amountData.todaysProfit || 0,
-                totalProfits: amountData.totalProfits || 0, // Add totalProfits
+                totalProfits: amountData.totalProfits || 0,
                 frozenAmount: amountData.frozenAmount || 0,
                 freezingPoint: amountData.freezingPoint || 0
             }

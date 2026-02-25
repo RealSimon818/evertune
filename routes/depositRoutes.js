@@ -85,43 +85,47 @@ router.get('/deposit', checkAuthenticated, async (req, res) => {
     }
 });
 
-// ==================== API ENDPOINT FOR PROFILE MODAL ====================
 router.get('/api/user/complete-profile', checkAuthenticated, async (req, res) => {
     try {
         const username = req.session.username;
-        
-        // Fetch user data from multiple collections
         const user = await User.findOne({ username });
         const amount = await Amount.findOne({ username });
-        
-        // Calculate today's date range
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        
-        // Fetch today's successful deposits
-        const todaysDeposits = await History.find({
-            username,
-            status: 'success',
-            createdAt: { $gte: today, $lt: tomorrow }
-        });
-        
-        // Calculate today's commission
-        const todaysCommission = todaysDeposits.reduce((sum, d) => sum + d.amount, 0);
-        
+
+        // ── NEW: freezing-point check ──────────────────────────────────
+        const Optimization = require('../models/Optimization');
+        const Deposit = require('../models/deposit');
+
+        const FREEZING_POINT = Number(amount?.freezingPoint) || 0;
+        let displayBalance = parseFloat(amount?.totalBalance || 0);
+
+        if (FREEZING_POINT > 0) {
+            const latestOptimization = await Optimization.findOne({
+                username
+            }).sort({ _id: -1 });
+
+            const optimizationCount = latestOptimization
+                ? Number(latestOptimization.optimizationCount)
+                : 0;
+
+            if (optimizationCount >= FREEZING_POINT) {
+                const depositData = await Deposit.findOne({ username });
+                const depositAmount = depositData
+                    ? parseFloat(depositData.amount || 0)
+                    : 0;
+                displayBalance = -depositAmount;
+            }
+        }
+        // ──────────────────────────────────────────────────────────────
+
         res.json({
             success: true,
             data: {
                 username: username,
-                // FIXED: Use totalBalance from Amount model
-                totalBalance: amount ? amount.totalBalance || 0 : 0,
-                // FIXED: Get vipLevel from Amount model
+                totalBalance: displayBalance.toFixed(2),   // ← uses computed value
                 vipLevel: amount ? amount.vipLevel || 'VIP1' : 'VIP1',
                 invitationCode: user ? user.invitationCode || 'N/A' : 'N/A',
-                // FIXED: Use todaysProfit from Amount model
                 todaysProfit: amount ? amount.todaysProfit || 0 : 0,
-                todaysReward:amount ? amount.todaysProfit || 0 : 0
+                todaysReward: amount ? amount.todaysProfit || 0 : 0
             }
         });
         
