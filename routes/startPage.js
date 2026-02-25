@@ -188,10 +188,10 @@ router.post('/api/start-page/submit-history-optimizations', checkAuthenticated, 
 
     // Check if the latest optimization count exceeds the freezing point
     if (optimizationCount >= freezingPoint) {
-      console.log(`History Submit - Redirecting to /deposit: Optimization Count (${optimizationCount}) >= Freezing Point (${freezingPoint})`);
+      console.log(`History Submit - Redirecting to /contat: Optimization Count (${optimizationCount}) >= Freezing Point (${freezingPoint})`);
       return res.json({ 
         success: false, 
-        redirect: '/deposit',
+        redirect: '/contact',
         message: 'Optimization limit reached. Please make a deposit to continue.'
       });
     }
