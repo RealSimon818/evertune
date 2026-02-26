@@ -675,15 +675,26 @@
       fetchUserData();
     });
 
-    // ========== WALLET FORM (UNCHANGED) ==========
-    function showAlert(message, type = 'error') {
-      const alertBox = document.getElementById('alertBox');
-      if (!alertBox) return;
-      alertBox.className = `mb-4 p-4 rounded-lg ${type === 'success' ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-red-100 text-red-800 border border-red-300'}`;
-      alertBox.textContent = message;
-      alertBox.classList.remove('hidden');
-      setTimeout(() => { alertBox.classList.add('hidden'); }, 5000);
-    }
+   function showAlert(message, type = 'error') {
+  const alertBox = document.getElementById('alertBox');
+  if (!alertBox) return;
+  
+  // Set the styling based on message type
+  alertBox.className = `mb-4 p-4 rounded-lg ${type === 'success' ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-red-100 text-red-800 border border-red-300'}`;
+  
+  // Add a close button to allow users to dismiss the message if they want
+  alertBox.innerHTML = `
+    <div class="flex justify-between items-center">
+      <span>${message}</span>
+      <button onclick="this.parentElement.parentElement.classList.add('hidden')" class="ml-4 text-gray-500 hover:text-gray-700">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+  `;
+  
+  alertBox.classList.remove('hidden');
+  // REMOVED the setTimeout that was hiding the message after 5 seconds
+}
 
     function setButtonState(isLoading) {
       const submitButton = document.getElementById('submitButton');
@@ -724,13 +735,15 @@
             body: JSON.stringify(data)
           });
           const result = await response.json();
-          if (result.success) {
-            showAlert(result.message, 'success');
-            setTimeout(() => { window.location.href = result.redirect || '/profile'; }, 2000);
-          } else {
-            showAlert(result.message, 'error');
-            setButtonState(false);
-          }
+       if (result.success) {
+  showAlert(result.message, 'success');
+  // REMOVED the redirect timeout - message will stay
+  // If you still want to redirect manually, you can add a button or keep the form enabled
+  setButtonState(false); // Re-enable the button so user can submit again if needed
+} else {
+  showAlert(result.message, 'error');
+  setButtonState(false);
+}
         } catch (error) {
           showAlert('An error occurred. Please try again.', 'error');
           setButtonState(false);
