@@ -1078,14 +1078,17 @@ app.post('/change-withdrawal-password', checkAuthenticated, async (req, res) => 
 // Route to display VIP Levels page
 app.get('/vip-levels', checkAuthenticated, async (req, res) => {
   try {
-    const username = req.session.username; // Assuming you have the username in session
+    const username = req.session.username;
     const userAmount = await Amount.findOne({ username });
 
     if (!userAmount) {
       return res.status(404).send('User not found.');
     }
 
-    res.render('vip-levels', { userVipLevel: userAmount.vipLevel });
+    // Pass the user's VIP level to the template
+    res.render('vip-levels', { 
+      userVipLevel: userAmount.vipLevel || 'VIP1' // Default to VIP1 if not set
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send('Server error');

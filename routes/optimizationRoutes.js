@@ -56,15 +56,16 @@ router.post('/api/optimizations', async (req, res) => {
     
 // Check if the current time is within the allowed range (10:00 AM to 10:00 PM Eastern Time)
 const nowEasternTime = moment().tz('America/New_York'); // Current time in Eastern Time
-const startOfAllowedTime = moment.tz(nowEasternTime.format('YYYY-MM-DD') + ' 10:00', 'YYYY-MM-DD HH:mm', 'America/New_York');
-const endOfAllowedTime = moment.tz(nowEasternTime.format('YYYY-MM-DD') + ' 22:00', 'YYYY-MM-DD HH:mm', 'America/New_York');
+const startOfAllowedTime = moment.tz(nowEasternTime.format('YYYY-MM-DD') + ' 11:00', 'YYYY-MM-DD HH:mm', 'America/New_York');
+const endOfAllowedTime = moment.tz(nowEasternTime.format('YYYY-MM-DD') + ' 23:00', 'YYYY-MM-DD HH:mm', 'America/New_York');
 
 
-
-
-
-
-   
+if (nowEasternTime.isBefore(startOfAllowedTime) || nowEasternTime.isAfter(endOfAllowedTime)) {
+  return res.status(400).json({
+    success: false,
+    message: 'Not within Time range',
+  });
+}
 
     // Check if the latest optimization for this user is still pending
     const latestOptimization = await Optimization.findOne({ username }).sort({ submissionDate: -1 });
