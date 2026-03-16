@@ -766,7 +766,7 @@ const MAX_WITHDRAWAL_LIMITS = {
 };
 
 const MIN_WITHDRAWAL_LIMITS = {
- vip1: 100,
+ vip1: 50,
   vip2: 500,
   vip3: 1500,
   vip4: 5000
